@@ -1,0 +1,47 @@
+# 1. Dependencies (Sangat Berat & BISA Di-install ulang)
+/node_modules
+/.pnpm-store
+
+# 2. Production Build Output (Dihasilkan oleh CI/CD, bukan ditulis manual)
+/build
+/dist
+/out
+
+# 3. Environment Variables & Secret (KEAMANAN SANGAT KRUSIAL)
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# 4. Cache & Temporary Files
+/.cache
+/.parcel-cache
+/.vite
+/.eslintcache
+*.tsbuildinfo
+
+# 5. Logs (File Error/Debug Log)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# 6. Coverage & Testing
+/coverage
+
+# 7. IDE & Editor Configuration (Lokal masing-masing developer)
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 8. OS System Files
+.DS_Store
+Thumbs.db
+ehthumbs.db
