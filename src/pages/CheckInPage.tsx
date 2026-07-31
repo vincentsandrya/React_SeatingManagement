@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Scanner } from '@yudiel/react-qr-scanner';
 import { Search, UserCheck, CheckCircle2, AlertCircle, X, Users } from 'lucide-react';
 import { guestService } from '../services/guestService';

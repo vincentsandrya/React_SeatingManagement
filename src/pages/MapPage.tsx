@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Map as MapIcon, Users, CheckCircle2, Clock, X, Info, Loader2 } from 'lucide-react';
 import { formatTime } from '../utils/helpers';
 import { seatService } from '../services/seatService';
