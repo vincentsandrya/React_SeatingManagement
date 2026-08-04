@@ -13,21 +13,30 @@ export default function MapPage() {
   const [selectedSeatInfo, setSelectedSeatInfo] = useState<SeatWithGuestBinding | null>(null);
   const [guestDetail, setGuestDetail] = useState<GuestDWithRelation | null>(null);
   const [isDetailLoading, setIsDetailLoading] = useState(false);
+const fetchMapData = async () => {
+    try {
+      const data = await seatService.getSeats();
+      setSeats(data);
+    } catch (error) {
+      console.error("Gagal memuat peta:", error);
+    } finally {
+      setIsLoadingMap(false);
+    }
+  };
 
-  // Load awal Peta
   useEffect(() => {
-    const fetchMapData = async () => {
-      setIsLoadingMap(true);
-      try {
-        const data = await seatService.getSeats();
-        setSeats(data);
-      } catch (error) {
-        console.error("Gagal memuat peta:", error);
-      } finally {
-        setIsLoadingMap(false);
-      }
-    };
+    // 1. Load data awal peta
     fetchMapData();
+
+    // 2. Daftarkan realtime subscription melalui seatService
+    const unsubscribe = seatService.subscribeToMapUpdates(() => {
+      fetchMapData();
+    });
+
+    // 3. Cleanup saat komponen ditutup
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   // Handler saat kursi di-klik
@@ -97,31 +106,36 @@ export default function MapPage() {
             Loading Map Data...
           </div>
         ) : (
-          <div className="relative w-full max-w-5xl bg-white rounded-lg shadow-sm border border-slate-300 overflow-hidden">
+          <div className="w-full overflow-auto bg-white rounded-lg shadow-sm border border-slate-300 relative">
             
-            <img 
-              src="../assets/Image/Map.png" 
-              alt="Venue Blueprint" 
-              className="w-full h-full object-cover opacity-80"
-              onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-            />
-            <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-300 -z-10">
-              [ /venue-map.png placeholder ]
-            </div>
+            {/* Inner canvas dengan min-width agar elemen kursi tidak berhimpitan di HP */}
+            <div className="relative min-w-[900px] w-full">
+              
+              <img 
+                src="../assets/Image/Map.png" 
+                alt="Venue Blueprint" 
+                className="w-full h-auto block opacity-80"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
+              
+              <div className="absolute inset-0 flex items-center justify-center text-xs text-slate-300 -z-10 min-h-[500px]">
+                [ /venue-map.png placeholder ]
+              </div>
 
-            {/* RENDER KURSI / SEATS */}
-            {seats.map((seat) => (
-              <button
-                key={seat.seat_id}
-                onClick={() => handleSeatClick(seat)}
-                className={`absolute flex flex-col items-center justify-center w-6 h-6 -ml-4 -mt-4 rounded-3xl border-2 transition-all cursor-pointer transform hover:scale-110 active:scale-95 ${getSeatColor(seat.guest_d_id, seat.checked_in_at)}`}
-                style={{ left: `${seat.x_position}%`, top: `${seat.y_position}%` }}
-                title={`Table ${seat.table_number} - Seat ${seat.seat_number}`}
-              >
-                <span className="text-xs font-semibold leading-none">{seat.table_number}{seat.seat_number}</span>
-              </button>
-            ))}
-            
+              {/* RENDER KURSI / SEATS */}
+              {seats.map((seat) => (
+                <button
+                  key={seat.seat_id}
+                  onClick={() => handleSeatClick(seat)}
+                  className={`absolute flex flex-col items-center justify-center w-7 h-7 -ml-3.5 -mt-3.5 rounded-full border-2 transition-all cursor-pointer transform hover:scale-125 active:scale-95 shadow-md z-10 ${getSeatColor(seat.guest_d_id, seat.checked_in_at)}`}
+                  style={{ left: `${seat.x_position}%`, top: `${seat.y_position}%` }}
+                  title={`Table ${seat.table_number} - Seat ${seat.seat_number}`}
+                >
+                  <span className="text-[10px] font-bold leading-none">{seat.table_number}{seat.seat_number}</span>
+                </button>
+              ))}
+
+            </div>
           </div>
         )}
       </div>

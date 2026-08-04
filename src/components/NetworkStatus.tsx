@@ -39,12 +39,12 @@ export default function NetworkStatus() {
       {isOnline ? (
         <>
           <Wifi size={12} className="text-emerald-500" />
-          <span>Connected</span>
+          <span className="hidden md:block">Connected</span>
         </>
       ) : (
         <>
           <WifiOff size={12} className="text-red-500" />
-          <span>Offline / Reconnecting</span>
+          <span className="hidden md:block">Reconnecting</span>
         </>
       )}
     </div>

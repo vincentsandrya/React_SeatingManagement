@@ -40,7 +40,7 @@ export const Login: React.FC = () => {
             <Armchair className="w-4 h-4 text-white" />
           </div>
           <div className="text-xl font-bold text-black tracking-tight">
-            Event Manager
+            Seating Event Manager
           </div>
         </div>
 

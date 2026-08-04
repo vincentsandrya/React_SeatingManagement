@@ -61,5 +61,27 @@ export const seatService = {
       console.error("Error fetching guest details for map:", error);
       throw error;
     }
+  },
+
+  subscribeToMapUpdates: (onUpdate: () => void) => {
+    const channel = supabase
+      .channel('map-realtime-service')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'guest_d',
+        },
+        () => {
+          onUpdate();
+        }
+      )
+      .subscribe();
+
+    // Mengembalikan fungsi unbind/cleanup agar bisa dilepas saat unmount
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }
 };

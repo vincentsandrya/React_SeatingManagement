@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from "./context/AuthContext";
 import { Login } from "./components/Login";
 import { MainLayout, type NavigationTab } from "./components/MainLayout";
 import DashboardPage from './pages/DashboardPage';
-import { ReportPage } from './pages/ReportPage';
 import CheckInPage from './pages/CheckInPage';
 import MasterAttendancePage from './pages/MasterAttendancePage';
 import MapPage from './pages/MapPage';
@@ -34,7 +33,6 @@ const AppContent: React.FC = () => {
       {activeTab === "master" && <MasterAttendancePage />}
       {activeTab === "checkin" && <CheckInPage />}
       {activeTab === "map" && <MapPage />}
-      {activeTab === "report" && <ReportPage />}
       {activeTab === "settings" && (
         <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
           Settings Page

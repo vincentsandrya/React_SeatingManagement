@@ -182,4 +182,74 @@ export const guestService = {
       throw error;
     }
   },
+
+  // --- Tambahkan ini di dalam guestService.ts ---
+
+  /**
+   * Mengambil seluruh data header tamu (guest_h) untuk keperluan Bulk QR.
+   * Ini memastikan QR di-generate per-tiket/undangan, bukan per-individu.
+   */
+  getGuestH: async (search: string = "") => {
+    try {
+      // Menggunakan inner join untuk mendapatkan ticket_code & category dari guest_h
+      let query = supabase.from("guest_h").select("*");
+
+      if (search) {
+        query = query.ilike("name", `%${search}%`);
+      }
+
+      const { data, error } = await query
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error("Gagal mengambil data tiket guest_h:", error);
+      throw error;
+    }
+  },
+  processDynamicCheckIn: async (guestHId: string, guestsData: any[]) => {
+    try {
+      const now = new Date().toISOString();
+
+      // Pisahkan mana tamu lama (punya guest_d_id) dan tamu baru
+      const existingGuests = guestsData.filter((g) => g.guest_d_id);
+      const newGuests = guestsData.filter((g) => !g.guest_d_id);
+
+      // 1. UPDATE tamu lama
+      if (existingGuests.length > 0) {
+        const existingIds = existingGuests.map((g) => g.guest_d_id);
+        const { error: updateError } = await supabase
+          .from("guest_d")
+          .update({ checked_in_at: now })
+          .in("guest_d_id", existingIds);
+
+        if (updateError) throw updateError;
+      }
+
+      // 2. INSERT tamu baru (jika ada)
+      if (newGuests.length > 0) {
+        const insertPayload = newGuests.map((g) => ({
+          guest_h_id: guestHId,
+          title: g.title || "",
+          name: g.name || "Unnamed Guest",
+          table_number: g.table_number || null,
+          seat_number: g.seat_number || null,
+          is_vegetarian: g.is_vegetarian || false,
+          checked_in_at: now, // Langsung di-set checked_in karena diinput saat check-in
+        }));
+
+        const { error: insertError } = await supabase
+          .from("guest_d")
+          .insert(insertPayload);
+
+        if (insertError) throw insertError;
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Gagal memproses check-in dinamis:", error);
+      throw error;
+    }
+  },
 };

@@ -22,7 +22,6 @@ export type NavigationTab =
   | "master"
   | "checkin"
   | "map"
-  | "report"
   | "settings"
   | "support";
 
@@ -48,7 +47,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     { id: "master", label: "Master Attendance", icon: Users },
     { id: "checkin", label: "Check-In", icon: QrCode },
     { id: "map", label: "Map", icon: MapPin },
-    { id: "report", label: "Report", icon: FileSpreadsheet },
   ];
 
   const bottomNavItems = [
@@ -66,8 +64,6 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         return "Check-In Scanner";
       case "map":
         return "Interactive Seating Map";
-      case "report":
-        return "Reports & Analytics";
       case "settings":
         return "System Settings";
       case "support":
@@ -177,10 +173,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             </button>
 
             <div className="flex items-center gap-2 text-sm">
-              <span className="font-bold text-slate-900 truncate">
-                {eventName}
+              <span className="hidden md:block font-bold text-slate-900 truncate">
+                {eventName} /
               </span>
-              <span className="text-slate-400">/</span>
               <span className="text-slate-500 font-medium truncate">
                 {getBreadcrumbTitle(activeTab)}
               </span>
@@ -202,7 +197,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
             </div>
 
             {/* Notification Bell */}
-            <button className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative">
+            <button className="hidden md:block p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative">
               <Bell className="w-5 h-5" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-indigo-600 rounded-full"></span>
             </button>

@@ -22,8 +22,8 @@ export default function DashboardPage() {
       try {
         const [statsData, recentGuestsData, logsData] = await Promise.all([
           guestService.getGuestStats(),
-          guestService.getRecentCheckIns(7), // Ambil 7 tamu terakhir
-          activityLogService.getActivityLogs(10) // Ambil 10 log terakhir
+          guestService.getRecentCheckIns(5),
+          activityLogService.getActivityLogs(5)
         ]);
 
         setStats(statsData);
@@ -43,12 +43,12 @@ export default function DashboardPage() {
       // Saat ada log baru masuk dari database (via trigger), langsung taruh di urutan paling atas
       setActivityLogs((prevLogs) => {
         const updatedLogs = [newLog, ...prevLogs];
-        return updatedLogs.slice(0, 20); // Batasi maksimal 20 log di layar agar memori tidak penuh
+        return updatedLogs.slice(0, 10); // Batasi maksimal 10 log di layar agar memori tidak penuh
       });
       
       // Opsional: Karena ada yang check-in, update angka stats (Background update)
       guestService.getGuestStats().then(setStats);
-      guestService.getRecentCheckIns(7).then(setRecentGuests);
+      guestService.getRecentCheckIns(5).then(setRecentGuests);
     });
 
     // Cleanup function: Matikan langganan realtime saat pindah halaman
@@ -68,38 +68,38 @@ export default function DashboardPage() {
   return (
     <div className="max-w-[1400px] mx-auto text-slate-800">
       <div className="mb-8">
-        <span className="text-3xl font-bold mb-1 text-slate-900">Event Dashboard</span>
+        <span className="text-xl font-bold mb-1 text-slate-900">Event Dashboard</span>
         <p className="text-sm text-slate-500">Real-time overview of your event attendance.</p>
       </div>
 
       {/* --- STATS GRID --- */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-slate-100 rounded-md text-slate-600"><Users size={24} /></div>
           <div>
-            <p className="text-xs font-mono text-slate-500 font-semibold uppercase">Total Invited</p>
-            <div className="text-2xl font-bold text-slate-900">{stats.total}</div>
+            <p className="text-xs font-mono text-slate-500 font-semibold uppercase">Invited</p>
+            <div className="text-2xl text-left font-bold text-slate-900">{stats.total}</div>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-blue-50 text-blue-600 rounded-md"><UserCheck size={24} /></div>
           <div>
             <p className="text-xs font-mono text-slate-500 font-semibold uppercase">Checked In</p>
-            <div className="text-2xl font-bold text-slate-900">{stats.checkedIn}</div>
-          </div>
-        </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-md"><ShieldUser size={24} /></div>
-          <div>
-            <p className="text-xs font-mono text-slate-500 font-semibold uppercase">VIP Arrived</p>
-            <div className="text-2xl font-bold text-slate-900">-</div>
+            <div className="text-2xl text-left font-bold text-slate-900">{stats.checkedIn}</div>
           </div>
         </div>
         <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex items-center gap-4">
           <div className="p-3 bg-amber-50 text-amber-600 rounded-md"><Clock size={24} /></div>
           <div>
             <p className="text-xs font-mono text-slate-500 font-semibold uppercase">Pending</p>
-            <div className="text-2xl font-bold text-slate-900">{stats.pending}</div>
+            <div className="text-2xl text-left font-bold text-slate-900">{stats.pending}</div>
+          </div>
+        </div>
+        <div className="bg-white border border-slate-200 rounded-lg p-5 shadow-sm flex items-center gap-4">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-md"><ShieldUser size={24} /></div>
+          <div>
+            <p className="text-xs font-mono text-slate-500 font-semibold uppercase">Others</p>
+            <div className="text-2xl text-left font-bold text-slate-900">-</div>
           </div>
         </div>
       </div>
