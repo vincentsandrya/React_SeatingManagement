@@ -5,7 +5,6 @@ import {
   Users,
   QrCode,
   MapPin,
-  FileSpreadsheet,
   Settings,
   HelpCircle,
   Search,
