@@ -7,6 +7,7 @@ import {
   X,
   Info,
   Loader2,
+  XCircle,
 } from "lucide-react";
 import { formatTime } from "../utils/helpers";
 import { seatService } from "../services/seatService";
@@ -83,11 +84,14 @@ export default function MapPage() {
   const getSeatColor = (
     guest_d_id: string | null,
     checked_in_at: string | null,
+    is_absent: boolean | false,
   ) => {
+    if (is_absent)
+      return "bg-red-400 text-slate-600 border-slate-400 hover:bg-red-500";
     if (!guest_d_id)
       return "bg-slate-300 text-slate-600 border-slate-400 hover:bg-slate-400";
     if (!checked_in_at)
-      return "bg-amber-400 text-amber-900 border-amber-500 hover:bg-amber-500 shadow-[0_0_10px_rgba(251,191,36,0.5)]";
+      return "bg-yellow-300 text-amber-900 border-amber-500 hover:bg-yellow-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]";
     return "bg-emerald-500 text-white border-emerald-600 hover:bg-emerald-600 shadow-[0_0_10px_rgba(16,185,129,0.5)]";
   };
 
@@ -117,6 +121,10 @@ export default function MapPage() {
           <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
             <div className="w-3 h-3 rounded-full bg-emerald-500 border border-emerald-600"></div>{" "}
             Checked In
+          </div>
+          <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-600">
+            <div className="w-3 h-3 rounded-full bg-red-400 border border-slate-400"></div>{" "}
+            Absent
           </div>
         </div>
       </div>
@@ -150,7 +158,7 @@ export default function MapPage() {
                 <button
                   key={seat.seat_id}
                   onClick={() => handleSeatClick(seat)}
-                  className={`absolute flex flex-col items-center justify-center w-6 h-6 -ml-3.5 -mt-3.5 rounded-full border-2 transition-all cursor-pointer transform hover:scale-125 hover:z-99 active:scale-95 shadow-md z-10 ${getSeatColor(seat.guest_d_id, seat.checked_in_at)}`}
+                  className={`absolute flex flex-col items-center justify-center w-6 h-6 -ml-3.5 -mt-3.5 rounded-full border-2 transition-all cursor-pointer transform hover:scale-125 hover:z-99 active:scale-95 shadow-md z-10 ${getSeatColor(seat.guest_d_id, seat.checked_in_at, seat.is_absent)}`}
                   style={{
                     left: `${seat.x_position}%`,
                     top: `${seat.y_position}%`,
@@ -158,10 +166,10 @@ export default function MapPage() {
                   title={`Table ${seat.table_number} - Seat ${seat.seat_number}`}
                 >
                   <div className="flex">
-                    <p className="text-[10px] text-blue-800 font-bold leading-none">
+                    <p className="text-[9px] text-gray-900 font-bold leading-none">
                       {seat.table_number}
                     </p>
-                    <p className="text-[10px] text-blue-500 font-bold leading-none">
+                    <p className="text-[9px] text-blue-700 font-bold leading-none">
                       {seat.seat_number}
                     </p>
                   </div>
@@ -271,7 +279,17 @@ export default function MapPage() {
                         Arrival Status
                       </div>
 
-                      {guestDetail.checked_in_at ? (
+                      {guestDetail.is_absent ? (
+                        <div className="flex items-center gap-2 text-red-700">
+                          <XCircle size={16} className="shrink-0" />
+                          <div>
+                            <div className="text-xs font-bold">Absent</div>
+                            <div className="text-[10px] opacity-80 mt-0.5">
+                              Guest confirm not attend.
+                            </div>
+                          </div>
+                        </div>
+                      ) : guestDetail.checked_in_at ? (
                         <div className="flex items-center gap-2 text-emerald-700">
                           <CheckCircle2 size={16} className="shrink-0" />
                           <div>

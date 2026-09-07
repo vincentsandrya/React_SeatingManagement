@@ -18,7 +18,7 @@ export const seatService = {
       // 2. Ambil data tamu (hanya kolom yang diperlukan untuk mapping warna peta)
       const { data: guests, error: guestError } = await supabase
         .from('guest_d')
-        .select('guest_d_id, table_number, seat_number, checked_in_at');
+        .select('guest_d_id, table_number, seat_number, checked_in_at, is_absent');
         
       if (guestError) throw guestError;
 
@@ -33,7 +33,8 @@ export const seatService = {
         return {
           ...seat,
           guest_d_id: assignedGuest ? assignedGuest.guest_d_id : null,
-          checked_in_at: assignedGuest ? assignedGuest.checked_in_at : null
+          checked_in_at: assignedGuest ? assignedGuest.checked_in_at : null,
+          is_absent : assignedGuest ? assignedGuest.is_absent : null
         };
       });
 

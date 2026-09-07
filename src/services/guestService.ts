@@ -17,11 +17,22 @@ export const guestService = {
       const { count: checkedIn } = await supabase
         .from("guest_d")
         .select("*", { count: "exact", head: true })
-        .not("checked_in_at", "is", null);
+        .not("checked_in_at", "is", null)
+        .eq("is_absent", false);
 
-      const pending = (total || 0) - (checkedIn || 0);
+      const { count: absent } = await supabase
+        .from("guest_d")
+        .select("*", { count: "exact", head: true })
+        .eq("is_absent", true);
 
-      return { total: total || 0, checkedIn: checkedIn || 0, pending };
+      const pending = (total || 0) - (checkedIn || 0) - (absent || 0);
+
+      return {
+        total: total || 0,
+        checkedIn: checkedIn || 0,
+        pending,
+        absent: absent || 0,
+      };
     } catch (error) {
       console.error("Error fetching guest stats:", error);
       throw error;
@@ -39,29 +50,16 @@ export const guestService = {
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
 
-    // Menggunakan inner join untuk mendapatkan ticket_code & category dari guest_h
-    let query = supabase.from("guest_d").select(
-      `
-        guest_d_id, 
-        guest_h_id, 
-        title, 
-        name, 
-        table_number, 
-        seat_number, 
-        is_vegetarian, 
-        checked_in_at,
-        guest_h!inner (ticket_code, category)
-      `,
-      { count: "exact" },
-    );
+    // Ganti target ke View yang baru kita buat
+    let query = supabase.from("vw_guest").select("*", { count: "exact" });
 
     if (search) {
-      query = query.ilike("name", `%${search}%`);
+      query = query.or(`h_name.ilike.%${search}%,name.ilike.%${search}%`);
     }
 
     const { data, count, error } = await query
       .range(from, to)
-      .order("name", { ascending: true });
+      .order("h_name", { ascending: true });
 
     if (error) throw error;
     return { data, count };
@@ -198,8 +196,7 @@ export const guestService = {
         query = query.ilike("name", `%${search}%`);
       }
 
-      const { data, error } = await query
-        .order("name", { ascending: true });
+      const { data, error } = await query.order("name", { ascending: true });
 
       if (error) throw error;
       return data;
@@ -251,5 +248,65 @@ export const guestService = {
       console.error("Gagal memproses check-in dinamis:", error);
       throw error;
     }
+  },
+  // Tambahkan fungsi ini di dalam guestService
+  async checkSeatAvailability(
+    tableNumber: string,
+    seatNumber: string,
+    excludeGuestId: string,
+  ): Promise<boolean> {
+    // Jika tidak ada input table/seat, anggap valid (bebas duduk/standing)
+    if (!tableNumber || !seatNumber) return true;
+
+    const { data, error } = await supabase
+      .from("guest_d")
+      .select("guest_d_id")
+      .eq("table_number", tableNumber)
+      .eq("seat_number", seatNumber)
+      .neq("guest_d_id", excludeGuestId) // Abaikan tamu ini sendiri agar tidak false-positive
+      .limit(1);
+
+    if (error) {
+      console.error("Error checking seat:", error);
+      throw error;
+    }
+
+    // Jika data.length === 0, berarti kursi KOSONG (Available = true)
+    return data.length === 0;
+  },
+
+  getGuestHByNameAndDName: async (search: string) => {
+    // Cari ke View berdasarkan Nama Tamu ATAU Nama Undangan
+    const { data, error } = await supabase
+      .from("vw_guest")
+      .select("guest_h_id, h_name, ticket_code, category")
+      .or(`h_name.ilike.%${search}%,name.ilike.%${search}%`)
+      .limit(30);
+
+    if (error) {
+      console.error("Error getGuestHByNameAndDName() :", error);
+      return [];
+    }
+
+    const uniqueGroups = Array.from(
+      new Map(data.map((item) => [item.guest_h_id, item])).values(),
+    );
+
+    return uniqueGroups;
+  },
+
+  // Ambil Header saja (Untuk persiapan jika Guest_D nya ternyata kosong)
+  getGuestHByTicketCode: async (ticketCode: string) => {
+    const { data, error } = await supabase
+      .from("guest_h")
+      .select("guest_h_id, ticket_code, category")
+      .eq("ticket_code", ticketCode)
+      .single();
+
+    if (error) {
+      console.error("Header not found or error:", error);
+      return null;
+    }
+    return data;
   },
 };

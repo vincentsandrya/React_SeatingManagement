@@ -1,27 +1,29 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   QrCode,
   Download,
-  Printer,
   Edit3,
   CheckCircle2,
   Clock,
   ChevronLeft,
   ChevronRight,
-  X,
   Search,
-  Loader2,
+  XCircle,
 } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
 
-// Import Services & Helpers
+// Import Services, Helpers & Types
 import { guestService } from "../services/guestService";
 import { formatTime } from "../utils/helpers";
-import type { GuestDWithRelation } from "../types/database.types";
+import type { GuestView } from "../types/database.types";
+
+// Import Components
+import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
+import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
+import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
 
 export default function MasterAttendancePage() {
   // --- STATES ---
-  const [guests, setGuests] = useState<GuestDWithRelation[]>([]);
+  const [guests, setGuests] = useState<GuestView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Pagination & Search
@@ -31,26 +33,20 @@ export default function MasterAttendancePage() {
   const [totalGuests, setTotalGuests] = useState(0);
   const pageSize = 10;
 
-  // Modals - Individual
-  const [selectedGuestQR, setSelectedGuestQR] =
-    useState<GuestDWithRelation | null>(null);
-  const [editingGuest, setEditingGuest] = useState<GuestDWithRelation | null>(
+  // Modals Visibility & Data
+  const [selectedGuestQR, setSelectedGuestQR] = useState<GuestView | null>(
     null,
   );
-
-  // Modals - Bulk QR (Menggunakan Guest_H)
+  const [editingGuest, setEditingGuest] = useState<GuestView | null>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
-  const [bulkTickets, setBulkTickets] = useState<any[]>([]);
-  const [isLoadingBulk, setIsLoadingBulk] = useState(false);
-
-  const [isSaving, setIsSaving] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
 
+  // --- EFFECTS ---
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchQuery);
       setCurrentPage(1);
-    }, 500);
+    }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
@@ -63,7 +59,7 @@ export default function MasterAttendancePage() {
           currentPage,
           pageSize,
         );
-        setGuests(data as unknown as GuestDWithRelation[]);
+        setGuests(data as unknown as GuestView[]);
         setTotalGuests(count || 0);
       } catch (error) {
         console.error("Gagal mengambil data tamu:", error);
@@ -76,39 +72,19 @@ export default function MasterAttendancePage() {
 
   // --- HANDLERS ---
   const totalPages = Math.ceil(totalGuests / pageSize);
-  const handlePrint = () => window.print();
   const handlePrevPage = () => setCurrentPage((prev) => Math.max(1, prev - 1));
   const handleNextPage = () =>
     setCurrentPage((prev) => Math.min(totalPages, prev + 1));
 
-  // Handler Buka Bulk QR
-  const handleOpenBulkQR = async () => {
-    setIsBulkModalOpen(true);
-    setIsLoadingBulk(true);
-    try {
-      // Mengambil seluruh data dari tabel guest_h
-      const data = await guestService.getGuestH();
-      setBulkTickets(data);
-    } catch (error) {
-      console.error("Gagal memuat tiket:", error);
-      alert("Terjadi kesalahan saat memuat data tiket.");
-    } finally {
-      setIsLoadingBulk(false);
-    }
-  };
-
-  // Handler Export CSV
   const handleExportCSV = async () => {
     setIsExporting(true);
     try {
       const { data } = await guestService.getGuests(debouncedSearch, 1, 5000);
-
-      if (!data || data.length === 0) {
-        alert("Tidak ada data untuk diexport.");
-        return;
-      }
+      if (!data || data.length === 0)
+        return alert("Tidak ada data untuk diexport.");
 
       const headers = [
+        "Invitation",
         "Title",
         "Name",
         "Category",
@@ -118,15 +94,15 @@ export default function MasterAttendancePage() {
         "Status",
         "Check-in Time",
       ];
-
       const rows = data.map((guest: any) => [
+        `"${guest.h_name || ""}"`,
         `"${guest.title || ""}"`,
         `"${guest.name || ""}"`,
-        `"${guest.guest_h?.category || ""}"`,
+        `"${guest.category || ""}"`,
         `"${guest.table_number || ""}"`,
         `"${guest.seat_number || ""}"`,
         `"${guest.is_vegetarian ? "Vegetarian" : "Normal"}"`,
-        `"${guest.checked_in_at ? "Checked In" : "Pending"}"`,
+        `"${guest.is_absent ? "Absent" : guest.checked_in_at ? "Checked In" : "Pending"}"`,
         `"${guest.checked_in_at ? formatTime(guest.checked_in_at) : "-"}"`,
       ]);
 
@@ -134,7 +110,6 @@ export default function MasterAttendancePage() {
         headers.join(","),
         ...rows.map((row: string[]) => row.join(",")),
       ].join("\n");
-
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
@@ -147,43 +122,23 @@ export default function MasterAttendancePage() {
       link.click();
       document.body.removeChild(link);
     } catch (error) {
-      console.error("Gagal mengexport CSV:", error);
       alert("Terjadi kesalahan saat mengexport data.");
+      console.log(error);
     } finally {
       setIsExporting(false);
     }
   };
 
-  // Handler Edit
-  const handleSaveEdit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!editingGuest) return;
-
-    setIsSaving(true);
-    try {
-      const formData = new FormData(e.currentTarget);
-      const updates = {
-        title: formData.get("title") as string,
-        name: formData.get("name") as string,
-        table_number: formData.get("table_number") as string,
-        seat_number: formData.get("seat_number") as string,
-        is_vegetarian: formData.get("is_vegetarian") === "true",
-      };
-
-      await guestService.updateGuestDetails(editingGuest.guest_d_id, updates);
-
-      setGuests((prevGuests) =>
-        prevGuests.map((g) =>
-          g.guest_d_id === editingGuest.guest_d_id ? { ...g, ...updates } : g,
-        ),
-      );
-      setEditingGuest(null);
-    } catch (error) {
-      console.error("Gagal memperbarui data:", error);
-      alert("Terjadi kesalahan saat menyimpan data.");
-    } finally {
-      setIsSaving(false);
-    }
+  // Callback dari Edit Modal saat disave
+  const onEditSuccess = (updatedData: Partial<GuestView>) => {
+    setGuests((prevGuests) =>
+      prevGuests.map((g) =>
+        g.guest_d_id === editingGuest?.guest_d_id
+          ? { ...g, ...updatedData }
+          : g,
+      ),
+    );
+    setEditingGuest(null); // Tutup modal
   };
 
   return (
@@ -214,7 +169,7 @@ export default function MasterAttendancePage() {
           </div>
 
           <button
-            onClick={handleOpenBulkQR}
+            onClick={() => setIsBulkModalOpen(true)}
             className="flex items-center gap-1.5 bg-black text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-slate-800 transition-colors shadow-sm"
           >
             <QrCode size={14} /> Bulk QR
@@ -235,18 +190,18 @@ export default function MasterAttendancePage() {
         <div className="overflow-x-auto flex-1">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/50 border-b border-slate-200">
+              <tr className="bg-slate-50/50 border-b border-slate-200 text-center">
                 <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                  Name
+                  Invitation
+                </th>
+                <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
+                  Family/Partner
                 </th>
                 <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
                   Category
                 </th>
-                <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                  Table
-                </th>
-                <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
-                  Seat
+                <th className="px-4 py-3 text-[10px] w-[100px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
+                  Table/Seat
                 </th>
                 <th className="px-4 py-3 text-[10px] font-mono font-semibold text-slate-500 uppercase tracking-wider">
                   Status
@@ -282,26 +237,33 @@ export default function MasterAttendancePage() {
                     className="hover:bg-slate-50 transition-colors"
                   >
                     <td className="px-4 py-3 text-xs font-semibold text-slate-900">
+                      {guest.h_name || "-"}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-semibold text-slate-900">
                       {guest.title} {guest.name}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-600">
                       <span className="bg-slate-100 px-2 py-0.5 rounded text-[10px] font-medium">
-                        {guest.guest_h?.category || "-"}
+                        {guest.category || "-"}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs font-mono text-slate-700">
                       {guest.table_number || "-"}
-                    </td>
-                    <td className="px-4 py-3 text-xs font-mono text-slate-700">
+                      {"/"}
                       {guest.seat_number || "-"}
                     </td>
                     <td className="px-4 py-3">
-                      {guest.checked_in_at ? (
+                      {guest.is_absent ? (
+                        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-red-700">
+                          <XCircle size={14} className="text-red-500" />
+                          Tidak Hadir
+                        </div>
+                      ) : guest.checked_in_at ? (
                         <div className="flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
                           <CheckCircle2
                             size={14}
                             className="text-emerald-500"
-                          />
+                          />{" "}
                           {formatTime(guest.checked_in_at)}
                         </div>
                       ) : (
@@ -339,256 +301,46 @@ export default function MasterAttendancePage() {
             Showing {totalGuests === 0 ? 0 : (currentPage - 1) * pageSize + 1} -{" "}
             {Math.min(currentPage * pageSize, totalGuests)} of {totalGuests}
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1">
-              <button
-                onClick={handlePrevPage}
-                disabled={currentPage === 1 || isLoading}
-                className="p-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
-              >
-                <ChevronLeft size={14} />
-              </button>
-              <span className="px-2 font-mono text-[11px] text-slate-600">
-                Pg {totalPages === 0 ? 0 : currentPage} / {totalPages}
-              </span>
-              <button
-                onClick={handleNextPage}
-                disabled={currentPage >= totalPages || isLoading}
-                className="p-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
-              >
-                <ChevronRight size={14} />
-              </button>
-            </div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handlePrevPage}
+              disabled={currentPage === 1 || isLoading}
+              className="p-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <span className="px-2 font-mono text-[11px] text-slate-600">
+              Pg {totalPages === 0 ? 0 : currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage >= totalPages || isLoading}
+              className="p-1 border border-slate-300 rounded bg-white hover:bg-slate-50 disabled:opacity-50"
+            >
+              <ChevronRight size={14} />
+            </button>
           </div>
         </div>
       </div>
 
-      {/* --- MODAL: EDIT GUEST (Dipersingkat untuk referensi, isinya sama) --- */}
+      {/* RENDER MODALS MENGGUNAKAN KOMPONEN YANG TELAH DIPISAH */}
       {editingGuest && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="flex justify-between items-center p-4 border-b border-slate-100 shrink-0">
-              <div className="text-xs font-bold text-slate-900">
-                Edit Guest Details
-              </div>
-              <button
-                onClick={() => setEditingGuest(null)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleSaveEdit}
-              className="flex flex-col overflow-hidden"
-            >
-              <div className="p-5 space-y-4 overflow-y-auto">
-                <div className="flex gap-3">
-                  <div className="w-1/3">
-                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Title
-                    </label>
-                    <input
-                      type="text"
-                      name="title"
-                      defaultValue={editingGuest.title || ""}
-                      className="w-full px-3 py-2 border border-slate-300 rounded text-xs outline-none focus:border-slate-900"
-                    />
-                  </div>
-                  <div className="w-2/3">
-                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      defaultValue={editingGuest.name}
-                      required
-                      className="w-full px-3 py-2 border border-slate-300 rounded text-xs outline-none focus:border-slate-900"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <div className="w-1/2">
-                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Table
-                    </label>
-                    <input
-                      type="text"
-                      name="table_number"
-                      defaultValue={editingGuest.table_number || ""}
-                      className="w-full px-3 py-2 border border-slate-300 rounded text-xs outline-none focus:border-slate-900"
-                    />
-                  </div>
-                  <div className="w-1/2">
-                    <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                      Seat
-                    </label>
-                    <input
-                      type="text"
-                      name="seat_number"
-                      defaultValue={editingGuest.seat_number || ""}
-                      className="w-full px-3 py-2 border border-slate-300 rounded text-xs outline-none focus:border-slate-900"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-semibold text-slate-500 mb-1">
-                    Dietary Preference
-                  </label>
-                  <select
-                    name="is_vegetarian"
-                    defaultValue={editingGuest.is_vegetarian ? "true" : "false"}
-                    className="w-full px-3 py-2 border border-slate-300 rounded text-xs outline-none focus:border-slate-900 bg-white"
-                  >
-                    <option value="false">Normal (Non-Vegetarian)</option>
-                    <option value="true">Vegetarian</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-2.5 shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setEditingGuest(null)}
-                  className="px-4 py-2 text-xs font-semibold border border-slate-300 rounded hover:bg-slate-100"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-5 py-2 bg-black text-white rounded text-xs font-semibold flex items-center justify-center hover:bg-slate-800 disabled:opacity-50"
-                >
-                  {isSaving ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EditGuestModal
+          guest={editingGuest}
+          onClose={() => setEditingGuest(null)}
+          onSuccess={onEditSuccess}
+        />
       )}
 
-      {/* --- MODAL: INDIVIDUAL QR GENERATE --- */}
       {selectedGuestQR && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-sm overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex justify-between items-center p-4 border-b border-slate-100">
-              <div className="text-xs font-bold text-slate-900">
-                Guest QR Code
-              </div>
-              <button
-                onClick={() => setSelectedGuestQR(null)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className="p-6 flex flex-col items-center justify-center bg-slate-50">
-              <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200 mb-3">
-                <QRCodeSVG
-                  value={selectedGuestQR.guest_h?.ticket_code || "NO-TICKET"}
-                  size={160}
-                  level="H"
-                />
-              </div>
-              <div className="text-sm font-bold text-slate-900">
-                {selectedGuestQR.title} {selectedGuestQR.name}
-              </div>
-              <div className="text-xs font-mono text-slate-500 mt-1">
-                {selectedGuestQR.guest_h?.ticket_code || "NO-TICKET"}
-              </div>
-            </div>
-            <div className="p-4 bg-white border-t border-slate-100">
-              <button
-                onClick={handlePrint}
-                className="w-full bg-black text-white py-2 rounded text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-slate-800"
-              >
-                <Printer size={14} /> Print Badge
-              </button>
-            </div>
-          </div>
-        </div>
+        <IndividualQRModal
+          guest={selectedGuestQR}
+          onClose={() => setSelectedGuestQR(null)}
+        />
       )}
 
-      {/* --- MODAL: BULK GENERATE QR (DARI GUEST_H) --- */}
       {isBulkModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[85vh]">
-            <div className="flex justify-between items-center p-4 border-b border-slate-100 shrink-0">
-              <div>
-                <div className="text-xs font-bold text-slate-900">
-                  Bulk Generate QR Tickets
-                </div>
-                <div className="text-[10px] text-slate-500">
-                  Generating {bulkTickets.length} unique tickets from Guest
-                  Master Data.
-                </div>
-              </div>
-              <button
-                onClick={() => setIsBulkModalOpen(false)}
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="p-5 bg-slate-50 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 overflow-y-auto print-grid">
-              {isLoadingBulk ? (
-                <div className="col-span-full flex flex-col items-center justify-center py-12 text-slate-500 gap-3">
-                  <Loader2 size={24} className="animate-spin text-blue-600" />
-                  <span className="text-xs font-semibold">
-                    Fetching all tickets...
-                  </span>
-                </div>
-              ) : bulkTickets.length === 0 ? (
-                <div className="col-span-full text-center py-8 text-xs text-slate-500">
-                  No tickets found in the database.
-                </div>
-              ) : (
-                bulkTickets.map((ticket) => (
-                  <div
-                    key={ticket.guest_h_id}
-                    className="bg-white p-3 rounded border border-slate-200 flex flex-col items-center text-center shadow-sm"
-                  >
-                    {/* Menggunakan ticket_code atau fallback ke ticket_no jika penamaan kolom Anda berbeda */}
-                    <QRCodeSVG
-                      value={
-                        ticket.ticket_code || ticket.ticket_no || "NO-TICKET"
-                      }
-                      size={80}
-                      className="mb-2"
-                    />
-                    <div className="text-[11px] font-bold text-slate-900 line-clamp-1">
-                      {ticket.category || "Guest"}
-                    </div>
-                    <div className="text-[9px] font-mono text-slate-500">
-                      {ticket.ticket_code || ticket.ticket_no}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="p-4 bg-white border-t border-slate-100 flex justify-end gap-2.5 shrink-0">
-              <button
-                onClick={() => setIsBulkModalOpen(false)}
-                className="px-4 py-2 text-xs font-semibold border border-slate-300 rounded hover:bg-slate-50"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePrint}
-                disabled={isLoadingBulk || bulkTickets.length === 0}
-                className="px-5 py-2 bg-black text-white rounded text-xs font-semibold flex items-center gap-1.5 hover:bg-slate-800 disabled:opacity-50"
-              >
-                <Printer size={14} /> Print All
-              </button>
-            </div>
-          </div>
-        </div>
+        <BulkQRModal onClose={() => setIsBulkModalOpen(false)} />
       )}
     </div>
   );

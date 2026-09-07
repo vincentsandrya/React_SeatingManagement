@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import { Login } from "./components/Login";
-import { MainLayout, type NavigationTab } from "./components/MainLayout";
+import { Login } from "./components/Layout/Login";
+import { MainLayout, type NavigationTab } from "./components/Layout/MainLayout";
 import DashboardPage from './pages/DashboardPage';
 import CheckInPage from './pages/CheckInPage';
 import MasterAttendancePage from './pages/MasterAttendancePage';

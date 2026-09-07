@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { supabase } from '../lib/supabase';
-import { Mail, Lock, Armchair, Loader2 } from 'lucide-react';
+import React, { useState } from "react";
+import { supabase } from "../../lib/supabase";
+import { Mail, Lock, Armchair, Loader2 } from "lucide-react";
 
 export const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -21,9 +21,9 @@ export const Login: React.FC = () => {
 
     if (error) {
       setErrorMessage(
-        error.message === 'Invalid login credentials'
-          ? 'Email atau password salah.'
-          : error.message
+        error.message === "Invalid login credentials"
+          ? "Email atau password salah."
+          : error.message,
       );
     }
     setLoading(false);
@@ -33,7 +33,6 @@ export const Login: React.FC = () => {
     <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4">
       {/* Main Card Container */}
       <div className="w-full m-4 max-w-xs bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        
         {/* Top Header Section */}
         <div className="bg-gray-300 p-5 text-center border-b border-slate-200/80">
           <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center mx-auto shadow-sm">
@@ -47,9 +46,7 @@ export const Login: React.FC = () => {
         {/* Form Body Section */}
         <div className="p-4">
           <div className="mb-4">
-            <p className="text-md font-bold text-slate-900 mb-1">
-              Sign In
-            </p>
+            <p className="text-md font-bold text-slate-900 mb-1">Sign In</p>
             <p className="text-xs text-slate-500">
               Welcome back! Please enter your credentials.
             </p>
@@ -162,7 +159,6 @@ export const Login: React.FC = () => {
             </a>
           </p>
         </div> */}
-
       </div>
     </div>
   );
