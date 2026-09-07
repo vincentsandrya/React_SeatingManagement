@@ -20,13 +20,14 @@ export default function RegisteredGuestsList({
       <div className="border border-slate-200 rounded-lg overflow-hidden bg-white">
         {initialGuests.map((guest) => {
           const isAlreadyCheckedIn = !!guest.checked_in_at;
+          const isAbsent = !!guest.is_absent;
           const isChecked = selectedGuestIds.includes(guest.guest_d_id);
 
           return (
             <label
               key={guest.guest_d_id}
               className={`flex items-center gap-3 p-3 border-b border-slate-100 last:border-0 transition-colors ${
-                isAlreadyCheckedIn
+                isAlreadyCheckedIn || isAbsent
                   ? "bg-slate-50 cursor-default"
                   : "hover:bg-blue-50 cursor-pointer"
               }`}
@@ -34,7 +35,7 @@ export default function RegisteredGuestsList({
               <div className="relative flex items-center pl-1">
                 <input
                   type="checkbox"
-                  disabled={isAlreadyCheckedIn}
+                  disabled={isAlreadyCheckedIn || isAbsent}
                   checked={isAlreadyCheckedIn || isChecked}
                   onChange={() =>
                     !isAlreadyCheckedIn && onToggleSelection(guest.guest_d_id)
@@ -54,7 +55,11 @@ export default function RegisteredGuestsList({
                 </div>
               </div>
               <div className="text-right pr-1">
-                {isAlreadyCheckedIn ? (
+                {isAbsent ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded">
+                    <CheckCircle2 size={12} /> Absent
+                  </span>
+                ) : isAlreadyCheckedIn ? (
                   <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded">
                     <CheckCircle2 size={12} /> Checked In
                   </span>
