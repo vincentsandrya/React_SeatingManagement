@@ -35,6 +35,7 @@ export default function CheckInConfirmationModal({
     if (initialGuests && initialGuests.length > 0) {
       const pendingIds = initialGuests
         .filter((g) => !g.checked_in_at)
+        .filter((g) => g.is_absent)
         .map((g) => g.guest_d_id);
       setSelectedGuestIds(pendingIds);
     }

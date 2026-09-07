@@ -36,7 +36,7 @@ export default function RegisteredGuestsList({
                 <input
                   type="checkbox"
                   disabled={isAlreadyCheckedIn || isAbsent}
-                  checked={isAlreadyCheckedIn || isChecked}
+                  checked={!isAbsent && (isAlreadyCheckedIn || isChecked)}
                   onChange={() =>
                     !isAlreadyCheckedIn && onToggleSelection(guest.guest_d_id)
                   }
