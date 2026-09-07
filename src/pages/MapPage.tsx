@@ -141,7 +141,7 @@ export default function MapPage() {
             {/* Inner canvas dengan min-width agar elemen kursi tidak berhimpitan di HP */}
             <div className="relative min-w-[900px] w-full">
               <img
-                src="../assets/Image/Map.png"
+                src="../assets/Image/MapCream.png"
                 alt="Venue Blueprint"
                 className="w-full h-auto block opacity-80"
                 onError={(e) => {
