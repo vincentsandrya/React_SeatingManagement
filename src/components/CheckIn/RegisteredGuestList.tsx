@@ -38,9 +38,11 @@ export default function RegisteredGuestsList({
                   disabled={isAlreadyCheckedIn || isAbsent}
                   checked={!isAbsent && (isAlreadyCheckedIn || isChecked)}
                   onChange={() =>
-                    !isAlreadyCheckedIn && onToggleSelection(guest.guest_d_id)
+                    !isAlreadyCheckedIn &&
+                    !isAbsent &&
+                    onToggleSelection(guest.guest_d_id)
                   }
-                  className="w-4 h-4 border border-slate-300 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer"
+                  className="w-4 h-4 border border-slate-300 rounded text-blue-600 focus:ring-blue-500 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
                 />
               </div>
               <div className="flex-1">
