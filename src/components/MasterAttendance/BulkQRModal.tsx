@@ -72,7 +72,7 @@ export default function BulkQRModal({ onClose }: BulkQRModalProps) {
                   className="mb-2"
                 />
                 <div className="text-[11px] font-bold text-slate-900 line-clamp-1">
-                  {ticket.category || "Guest"}
+                  {ticket.title ? ticket.title + " " + ticket.name : "Guest"}
                 </div>
                 <div className="text-[9px] font-mono text-slate-500">
                   {ticket.ticket_code || ticket.ticket_no}
