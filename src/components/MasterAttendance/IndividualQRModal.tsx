@@ -1,6 +1,8 @@
 import { X, Printer } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import type { GuestView } from "../../types/database.types";
+import { useReactToPrint } from "react-to-print";
+import { useRef } from "react";
 
 interface IndividualQRModalProps {
   guest: GuestView;
@@ -11,7 +13,18 @@ export default function IndividualQRModal({
   guest,
   onClose,
 }: IndividualQRModalProps) {
-  const handlePrint = () => window.print();
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: "Bulk_QR_Tickets",
+    pageStyle: `
+      @page {
+        size: A4;
+        margin: 15mm;
+      }
+    `,
+  });
 
   return (
     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -25,7 +38,10 @@ export default function IndividualQRModal({
             <X size={16} />
           </button>
         </div>
-        <div className="p-6 flex flex-col items-center justify-center bg-slate-50">
+        <div
+          ref={printRef}
+          className="p-6 flex flex-col items-center justify-center bg-slate-50"
+        >
           <div className="bg-white p-3 rounded-lg shadow-sm border border-slate-200 mb-3">
             <QRCodeSVG
               value={guest.ticket_code || "NO-TICKET"}
