@@ -45,15 +45,16 @@ export const printGuestTicket = async (guest_h_id: string) => {
             }
             body { 
                 font-family: Arial, sans-serif; 
-                font-size: 16px; 
+                font-size: 14px; 
                 margin: 0 !important; 
                 padding: 0 !important;
                 width: 100%;
+                vertical-align: top;
             }
             .ticket { 
                 width: 100%; 
-                height: 100%; /* Penuhi seluruh tinggi kertas */
-                padding: 2mm; 
+                height: auto; /* Penuhi seluruh tinggi kertas */
+                padding: 0mm; 
                 box-sizing: border-box; 
                 page-break-after: always; 
                 
@@ -64,7 +65,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
             .ticket-half {
                 width: 50%;
                 box-sizing: border-box;
-                padding: 2mm; /* Beri jarak sedikit antar kolom */
+                padding: 0mm; /* Beri jarak sedikit antar kolom */
             }
             hr { 
                 border: 0; 
@@ -73,8 +74,8 @@ export const printGuestTicket = async (guest_h_id: string) => {
             }
             .center { text-align: center; }
             .bold { font-weight: bold; }
-            .text-large { font-size: 20px; }
-            .info-row { margin-top: 4px; font-size: 18px; }
+            .text-large { font-size: 18px; }
+            .info-row { margin-top: 4px; font-size: 16px; }
           </style>
         </head>
         <body>
