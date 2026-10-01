@@ -35,7 +35,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
         <head>
           <style>
             @page { 
-                size: 60mm 40mm; 
+                size: 80mm 60mm; 
                 margin: 0; 
             }
             body { 
