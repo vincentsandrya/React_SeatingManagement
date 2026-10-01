@@ -7,7 +7,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
     // 1. Template HTML diperbaiki (Hapus width 50%)
     const ticketHTML = `
       <div class="ticket">
-        <div style="width: 100%;">
+        <div style="width: 50%;">
             <div class="center">Kode : ${data?.ticket_code}</div>
             <hr/>
             <div class="center bold text-large">${data?.name}</div>
@@ -19,7 +19,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 <span>PAX : <b>${data?.pax || 0}</b></span>
             </div>
         </div>
-        <div style="width: 100%;">
+        <div style="width: 50%;">
         </div>
       </div>
     `;
