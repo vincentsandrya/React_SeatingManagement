@@ -7,15 +7,19 @@ export const printGuestTicket = async (guest_h_id: string) => {
     // 1. Template HTML diperbaiki (Hapus width 50%)
     const ticketHTML = `
       <div class="ticket">
-        <div class="center">Kode : ${data?.ticket_code}</div>
-        <hr/>
-        <div class="center bold text-large">${data?.name}</div>
-        <hr/>
-        <div class="info-row">
-            <span>TABLE : <b>${data?.table_number || '-'}</b></span>
+        <div style="width: 100%;">
+            <div class="center">Kode : ${data?.ticket_code}</div>
+            <hr/>
+            <div class="center bold text-large">${data?.name}</div>
+            <hr/>
+            <div class="info-row">
+                <span>TABLE : <b>${data?.table_number || '-'}</b></span>
+            </div>
+            <div class="info-row">
+                <span>PAX : <b>${data?.pax || 0}</b></span>
+            </div>
         </div>
-        <div class="info-row">
-            <span>PAX : <b>${data?.pax || 0}</b></span>
+        <div style="width: 100%;">
         </div>
       </div>
     `;
@@ -47,7 +51,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
             }
             .ticket { 
                 width: 100%; /* Gunakan persentase, bukan mm agar fit ke layar spooler */
-                padding: 2mm 4mm; /* Beri sedikit ruang agar huruf tidak menabrak tepi potong */
+                padding: 0mm; /* Beri sedikit ruang agar huruf tidak menabrak tepi potong */
                 box-sizing: border-box; 
                 page-break-after: always; 
             }
