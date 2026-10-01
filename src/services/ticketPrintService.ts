@@ -39,12 +39,13 @@ export const printGuestTicket = async (guest_h_id: string) => {
           <style>
             @page { 
                 /* Pastikan ukuran ini SAMA dengan ukuran fisik kertas thermal Anda */
-                size: 100mm 80mm; 
+                size: 50mm 30mm; 
                 margin: 0 !important; 
+                background-color: black;
             }
             body { 
                 font-family: Arial, sans-serif; 
-                font-size: 14px; 
+                font-size: 16px; 
                 margin: 0 !important; 
                 padding: 0 !important;
                 width: 100%;
@@ -62,8 +63,8 @@ export const printGuestTicket = async (guest_h_id: string) => {
             }
             .center { text-align: center; }
             .bold { font-weight: bold; }
-            .text-large { font-size: 18px; }
-            .info-row { margin-top: 4px; font-size: 16px; }
+            .text-large { font-size: 20px; }
+            .info-row { margin-top: 4px; font-size: 18px; }
           </style>
         </head>
         <body>
