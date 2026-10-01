@@ -45,11 +45,12 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 padding: 0; 
             }
             .ticket { 
-                width: 56mm; /* Dikurangi sedikit untuk margin aman */
-                height: 36mm;
+                width: 80mm; /* Dikurangi sedikit untuk margin aman */
+                height: 60mm;
                 padding: 2mm; 
                 box-sizing: border-box; 
                 page-break-after: always; /* Pastikan rangkap ke-2 pindah kertas */
+                align: left;
             }
             hr { 
                 border: 0; 
