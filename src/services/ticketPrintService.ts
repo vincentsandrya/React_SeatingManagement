@@ -40,7 +40,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
           <style>
             @page { 
                 /* ISO A7 Landscape: Lebar 105mm, Tinggi 74mm */
-                size: 105mm 74mm; 
+                size: 105mm 20mm; 
                 margin: 0 !important; 
             }
             body { 
