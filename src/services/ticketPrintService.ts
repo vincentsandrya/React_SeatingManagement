@@ -4,10 +4,10 @@ export const printGuestTicket = async (guest_h_id: string) => {
   try {
     const data = await guestService.getTicketData(guest_h_id);
 
-    // 1. Template HTML diperbaiki (Hapus width 50%)
+    // 1. Template HTML
     const ticketHTML = `
       <div class="ticket">
-        <div style="width: 50%;">
+        <div class="ticket-half">
             <div class="center">Kode : ${data?.ticket_code}</div>
             <hr/>
             <div class="center bold text-large">${data?.name}</div>
@@ -19,7 +19,8 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 <span>PAX : <b>${data?.pax || 0}</b></span>
             </div>
         </div>
-        <div style="width: 50%;">
+        <div class="ticket-half">
+            <!-- Bagian kanan 50% kosong, mungkin untuk QR/Catatan -->
         </div>
       </div>
     `;
@@ -32,16 +33,15 @@ export const printGuestTicket = async (guest_h_id: string) => {
 
     const iframeDoc = iframe.contentWindow?.document;
 
-    // 2. CSS disesuaikan menggunakan width 100% dan !important pada margin
+    // 2. CSS disesuaikan untuk A7 Landscape dan Flexbox Layout
     iframeDoc?.write(`
       <html>
         <head>
           <style>
             @page { 
-                /* Pastikan ukuran ini SAMA dengan ukuran fisik kertas thermal Anda */
-                size: 50mm 30mm; 
+                /* ISO A7 Landscape: Lebar 105mm, Tinggi 74mm */
+                size: 105mm 74mm; 
                 margin: 0 !important; 
-                background-color: black;
             }
             body { 
                 font-family: Arial, sans-serif; 
@@ -51,14 +51,24 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 width: 100%;
             }
             .ticket { 
-                width: 100%; /* Gunakan persentase, bukan mm agar fit ke layar spooler */
-                padding: 0mm; /* Beri sedikit ruang agar huruf tidak menabrak tepi potong */
+                width: 100%; 
+                height: 100%; /* Penuhi seluruh tinggi kertas */
+                padding: 2mm; 
                 box-sizing: border-box; 
                 page-break-after: always; 
+                
+                /* [PENTING] Gunakan flex agar div 50% sejajar kiri-kanan */
+                display: flex;
+                flex-direction: row;
+            }
+            .ticket-half {
+                width: 50%;
+                box-sizing: border-box;
+                padding: 2mm; /* Beri jarak sedikit antar kolom */
             }
             hr { 
                 border: 0; 
-                border-top: 2px dashed #000; /* Ditebalkan sedikit agar jelas di thermal */
+                border-top: 2px dashed #000; 
                 margin: 6px 0; 
             }
             .center { text-align: center; }
