@@ -8,12 +8,16 @@ export const printGuestTicket = async (guest_h_id: string) => {
     // 2. Buat Template HTML sesuai format
     const ticketHTML = `
       <div class="ticket">
-        <div class="center">Kode : ${data?.ticket_code}</div>
-        <hr/>
-        <div class="center bold">${data?.name}</div>
-        <hr/>
-        <div>TABLE : ${data?.table_number}</div>
-        <div>PAX : ${data?.pax}</div>
+        <div style="width:50%">
+            <div class="center">Kode : ${data?.ticket_code}</div>
+            <hr/>
+            <div class="center bold">${data?.name}</div>
+            <hr/>
+            <div>TABLE : ${data?.table_number}</div>
+            <div>PAX : ${data?.pax}</div>
+        </div>
+        <div style="width:50%">
+        </div>
       </div>
     `;
 
