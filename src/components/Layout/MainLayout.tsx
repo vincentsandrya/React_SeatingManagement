@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Users,
   QrCode,
-  MapPin,
+  // MapPin,
   Settings,
   HelpCircle,
   Search,
