@@ -7,7 +7,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
     // 1. Template HTML
     const ticketHTML = `
       <div class="ticket">
-        <div class="ticket-half">
+        <div style="width:60%">
             <div class="center">Kode : ${data?.ticket_code}</div>
             <hr/>
             <div class="center bold text-large">${data?.name}</div>
@@ -19,7 +19,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 <span>PAX : <b>${data?.pax || 0}</b></span>
             </div>
         </div>
-        <div class="ticket-half">
+        <div style="width:40%">
             <!-- Bagian kanan 50% kosong, mungkin untuk QR/Catatan -->
         </div>
       </div>
@@ -61,11 +61,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 /* [PENTING] Gunakan flex agar div 50% sejajar kiri-kanan */
                 display: flex;
                 flex-direction: row;
-            }
-            .ticket-half {
-                width: 50%;
-                box-sizing: border-box;
-                padding: 0mm; /* Beri jarak sedikit antar kolom */
+                align-items: flex-start; /* <--- DITAMBAHKAN DI SINI AGAR RATA ATAS ---> */
             }
             hr { 
                 border: 0; 
