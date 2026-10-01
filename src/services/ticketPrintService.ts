@@ -2,66 +2,64 @@ import { guestService } from "./guestService";
 
 export const printGuestTicket = async (guest_h_id: string) => {
   try {
-    // 1. Tarik Data
     const data = await guestService.getTicketData(guest_h_id);
 
-    // 2. Buat Template HTML sesuai format
+    // 1. Template HTML diperbaiki (Hapus width 50%)
     const ticketHTML = `
       <div class="ticket">
-        <div style="width:50%">
-            <div class="center">Kode : ${data?.ticket_code}</div>
-            <hr/>
-            <div class="center bold">${data?.name}</div>
-            <hr/>
-            <div>TABLE : ${data?.table_number}</div>
-            <div>PAX : ${data?.pax}</div>
+        <div class="center">Kode : ${data?.ticket_code}</div>
+        <hr/>
+        <div class="center bold text-large">${data?.name}</div>
+        <hr/>
+        <div class="info-row">
+            <span>TABLE : <b>${data?.table_number || '-'}</b></span>
         </div>
-        <div style="width:50%">
+        <div class="info-row">
+            <span>PAX : <b>${data?.pax || 0}</b></span>
         </div>
       </div>
     `;
 
-    // 3. Cetak 2 Rangkap (Render 2 kali berturut-turut)
-    // Kita render 2 kali agar otomatis keluar 2 lembar dari printer
     const printContent = ticketHTML + ticketHTML;
 
-    // 4. Buat Hidden Iframe untuk mencetak tanpa mengganggu UI
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
     document.body.appendChild(iframe);
 
     const iframeDoc = iframe.contentWindow?.document;
 
-    // 5. Tulis HTML & CSS ke dalam iframe
-    // Ukuran 60x40 mm adalah standar kertas thermal/barcode
+    // 2. CSS disesuaikan menggunakan width 100% dan !important pada margin
     iframeDoc?.write(`
       <html>
         <head>
           <style>
             @page { 
+                /* Pastikan ukuran ini SAMA dengan ukuran fisik kertas thermal Anda */
                 size: 100mm 80mm; 
-                margin: 0; 
+                margin: 0 !important; 
             }
             body { 
                 font-family: Arial, sans-serif; 
-                font-size: 14px; /* Sesuaikan ukuran font nanti */
-                margin: 0; 
-                padding: 0; 
+                font-size: 14px; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                width: 100%;
             }
             .ticket { 
-                width: 100mm; /* Dikurangi sedikit untuk margin aman */
-                height: 80mm;
+                width: 100%; /* Gunakan persentase, bukan mm agar fit ke layar spooler */
+                padding: 2mm 4mm; /* Beri sedikit ruang agar huruf tidak menabrak tepi potong */
                 box-sizing: border-box; 
-                page-break-after: always; /* Pastikan rangkap ke-2 pindah kertas */
-                align: left;
+                page-break-after: always; 
             }
             hr { 
                 border: 0; 
-                border-top: 1px dashed #000; 
-                margin: 4px 0; 
+                border-top: 2px dashed #000; /* Ditebalkan sedikit agar jelas di thermal */
+                margin: 6px 0; 
             }
             .center { text-align: center; }
             .bold { font-weight: bold; }
+            .text-large { font-size: 18px; }
+            .info-row { margin-top: 4px; font-size: 16px; }
           </style>
         </head>
         <body>
@@ -71,12 +69,10 @@ export const printGuestTicket = async (guest_h_id: string) => {
     `);
     iframeDoc?.close();
 
-    // 6. Eksekusi Print setelah iframe selesai dimuat
     iframe.onload = () => {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
 
-      // Hapus iframe setelah selesai print (clean up)
       setTimeout(() => {
         document.body.removeChild(iframe);
       }, 1000);
