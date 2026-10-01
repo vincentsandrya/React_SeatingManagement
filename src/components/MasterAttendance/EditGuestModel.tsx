@@ -47,22 +47,22 @@ export default function EditGuestModal({
         is_absent: isAbsent,
       };
 
-      // --- 1. VALIDASI KETERSEDIAAN KURSI ---
-      if (updates.table_number && updates.seat_number) {
-        const isSeatAvailable = await guestService.checkSeatAvailability(
-          updates.table_number,
-          updates.seat_number,
-          guest.guest_d_id,
-        );
+      // // --- 1. VALIDASI KETERSEDIAAN KURSI ---
+      // if (updates.table_number && updates.seat_number) {
+      //   const isSeatAvailable = await guestService.checkSeatAvailability(
+      //     updates.table_number,
+      //     updates.seat_number,
+      //     guest.guest_d_id,
+      //   );
 
-        if (!isSeatAvailable) {
-          setErrorMsg(
-            `Table ${updates.table_number} - Seat ${updates.seat_number} sudah ditempati oleh tamu lain.`,
-          );
-          setIsSaving(false);
-          return;
-        }
-      }
+      //   if (!isSeatAvailable) {
+      //     setErrorMsg(
+      //       `Table ${updates.table_number} - Seat ${updates.seat_number} sudah ditempati oleh tamu lain.`,
+      //     );
+      //     setIsSaving(false);
+      //     return;
+      //   }
+      // }
 
       // --- 2. SIMPAN DATA ---
       await guestService.updateGuestDetails(guest.guest_d_id, updates);

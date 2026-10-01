@@ -6,6 +6,7 @@ import { guestService } from "../../services/guestService";
 import RegisteredGuestsList from "../CheckIn/RegisteredGuestList";
 import ExtraGuestsTable from "../CheckIn/ExtraGuestsTable";
 import type { ExtraGuest } from "../../types/CheckIn";
+import { printGuestTicket } from "../../services/ticketPrintService";
 
 interface CheckInConfirmationModalProps {
   scannedTicket: {
@@ -104,15 +105,15 @@ export default function CheckInConfirmationModal({
 
       // 3. VALIDASI WAJIB ISI: Pastikan Name, Table, dan Seat terisi di semua baris yang aktif
       const isIncomplete = activeExtraGuests.some(
-        (g) =>
-          g.name.trim() === "" ||
-          g.table_number.trim() === "" ||
-          g.seat_number.trim() === "",
+        (g) => g.name.trim() === "",
+        //|| g.table_number.trim() === "" ||
+        // g.seat_number.trim() === "",
       );
 
       if (isIncomplete) {
         setErrorMsg(
-          "Nama, Table, dan Seat wajib diisi untuk semua tambahan tamu.",
+          "Nama wajib diisi untuk semua tambahan tamu.",
+          // "Nama, Table, dan Seat wajib diisi untuk semua tambahan tamu.",
         );
         setIsProcessing(false);
         return; // Hentikan proses
@@ -134,38 +135,38 @@ export default function CheckInConfirmationModal({
       }
 
       // --- VALIDASI KURSI UNTUK TAMU TAMBAHAN ---
-      const checkedSeats = new Set<string>();
+      // const checkedSeats = new Set<string>();
 
-      for (const guest of guestsToInsert) {
-        if (guest.table_number && guest.seat_number) {
-          const seatKey = `${guest.table_number}-${guest.seat_number}`;
+      // for (const guest of guestsToInsert) {
+      //   if (guest.table_number && guest.seat_number) {
+      //     const seatKey = `${guest.table_number}-${guest.seat_number}`;
 
-          // Validasi A: Cek apakah staf mengetik kursi yang sama lebih dari 1 kali di dalam form
-          if (checkedSeats.has(seatKey)) {
-            setErrorMsg(
-              `Duplikasi Input: Table ${guest.table_number} - Seat ${guest.seat_number} diketik lebih dari satu kali.`,
-            );
-            setIsProcessing(false);
-            return;
-          }
-          checkedSeats.add(seatKey);
+      //     // Validasi A: Cek apakah staf mengetik kursi yang sama lebih dari 1 kali di dalam form
+      //     if (checkedSeats.has(seatKey)) {
+      //       setErrorMsg(
+      //         `Duplikasi Input: Table ${guest.table_number} - Seat ${guest.seat_number} diketik lebih dari satu kali.`,
+      //       );
+      //       setIsProcessing(false);
+      //       return;
+      //     }
+      //     checkedSeats.add(seatKey);
 
-          // Validasi B: Cek ke database apakah kursi sudah diduduki orang lain
-          // Kita kirim "000000" sebagai ID palsu agar service tidak mencoba mengecualikan ID null
-          const isAvailable = await guestService.checkSeatAvailability(
-            guest.table_number,
-            guest.seat_number,
-            "000000",
-          );
-          if (!isAvailable) {
-            setErrorMsg(
-              `Table ${guest.table_number} - Seat ${guest.seat_number} sudah ditempati oleh tamu lain.`,
-            );
-            setIsProcessing(false);
-            return;
-          }
-        }
-      }
+      //     // Validasi B: Cek ke database apakah kursi sudah diduduki orang lain
+      //     // Kita kirim "000000" sebagai ID palsu agar service tidak mencoba mengecualikan ID null
+      //     const isAvailable = await guestService.checkSeatAvailability(
+      //       guest.table_number,
+      //       guest.seat_number,
+      //       "000000",
+      //     );
+      //     if (!isAvailable) {
+      //       setErrorMsg(
+      //         `Table ${guest.table_number} - Seat ${guest.seat_number} sudah ditempati oleh tamu lain.`,
+      //       );
+      //       setIsProcessing(false);
+      //       return;
+      //     }
+      //   }
+      // }
 
       // --- SIMPAN DATA JIKA VALIDASI LOLOS ---
       const finalPayload = [...guestsToUpdate, ...guestsToInsert];
@@ -173,6 +174,8 @@ export default function CheckInConfirmationModal({
         scannedTicket.guest_h_id,
         finalPayload,
       );
+
+      await printGuestTicket(scannedTicket.guest_h_id);
 
       onSuccess(
         `Berhasil memproses check-in untuk ${finalPayload.length} tamu.`,
@@ -193,8 +196,8 @@ export default function CheckInConfirmationModal({
             <div className="text-sm font-bold flex items-center gap-2">
               <Users size={16} /> Confirm Check-In
             </div>
-            <div className="text-[11px] text-slate-400 font-mono mt-0.5">
-              Ticket: {scannedTicket.ticket_code} | Cat:{" "}
+            <div className="text-[16px] text-slate-400 font-mono mt-0.5 font-bold">
+              Ticket: {scannedTicket.ticket_code} | Category:{" "}
               {scannedTicket.category}
             </div>
           </div>

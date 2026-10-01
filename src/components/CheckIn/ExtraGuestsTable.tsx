@@ -40,10 +40,10 @@ export default function ExtraGuestsTable({
                 Full Name <span className="text-red-500">*</span>
               </th>
               <th className="px-3 py-2 text-[10px] font-bold text-slate-600 uppercase w-24">
-                Table <span className="text-red-500">*</span>
+                Table
               </th>
               <th className="px-3 py-2 text-[10px] font-bold text-slate-600 uppercase w-24">
-                Seat <span className="text-red-500">*</span>
+                Seat
               </th>
             </tr>
           </thead>

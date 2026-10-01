@@ -45,7 +45,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { id: "master", label: "Master Attendance", icon: Users },
     { id: "checkin", label: "Check-In", icon: QrCode },
-    { id: "map", label: "Map", icon: MapPin },
+    // { id: "map", label: "Map", icon: MapPin },
   ];
 
   const bottomNavItems = [

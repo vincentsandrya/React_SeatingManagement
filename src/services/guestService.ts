@@ -309,4 +309,60 @@ export const guestService = {
     }
     return data;
   },
+
+  getTicketData: async (guest_h_id: string) => {
+    // 1. Tarik data Header (guest_h) sekaligus berelasi dengan Detail (guest_d)
+    const { data, error } = await supabase
+      .from("guest_h")
+      .select(
+        `
+        ticket_code,
+        name,
+        guest_d (
+          guest_d_id,
+          table_number,
+          checked_in_at
+        )
+      `,
+      )
+      .eq("guest_h_id", guest_h_id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching ticket data from Supabase:", error);
+      throw new Error("Gagal mengambil data tiket dari database");
+    }
+
+    if (!data) return null;
+
+    // 2. Olah data guest_d untuk mencari PAX (count) dan MAX table_number
+    const guestDList = data.guest_d || [];
+
+    // Hitung jumlah tamu yang sudah check-in (checked_in_at terisi)
+    const checkedInGuests = guestDList.filter(
+      (d: any) => d.checked_in_at !== null,
+    );
+    const paxCount = checkedInGuests.length;
+
+    // Cari MAX table_number
+    // Filter table_number yang tidak kosong, lalu urutkan
+    let maxTable = "-";
+    const tables = guestDList
+      .map((d: any) => d.table_number)
+      .filter((t: any) => t && t.trim() !== "")
+      .sort(); // Sort secara alfabetis / numerik
+
+    if (tables.length > 0) {
+      // Ambil elemen terakhir setelah di-sort (menyimulasikan fungsi MAX)
+      maxTable = tables[tables.length - 1];
+    }
+
+    // 3. Return data sesuai format yang dibutuhkan oleh fungsi Print
+    return {
+      ticket_code: data.ticket_code,
+      name: data.name,
+      table_number: maxTable,
+      pax: paxCount,
+    };
+  },
 };

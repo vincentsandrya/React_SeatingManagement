@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Search,
   XCircle,
+  Printer,
 } from "lucide-react";
 
 // Import Services, Helpers & Types
@@ -20,6 +21,7 @@ import type { GuestView } from "../types/database.types";
 import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
 import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
 import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
+import { printGuestTicket } from "../services/ticketPrintService";
 
 export default function MasterAttendancePage() {
   // --- STATES ---
@@ -274,6 +276,17 @@ export default function MasterAttendancePage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-3">
+                        {guest.checked_in_at && (
+                          <button
+                            onClick={async () => {
+                              await printGuestTicket(guest.guest_h_id);
+                            }}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
+                            title="Print Tiket Tamu"
+                          >
+                            <Printer size={12} /> Print
+                          </button>
+                        )}
                         <button
                           onClick={() => setEditingGuest(guest)}
                           className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 transition-colors"

@@ -167,10 +167,7 @@ export default function MapPage() {
                 >
                   <div className="flex">
                     <p className="text-[9px] text-gray-900 font-bold leading-none">
-                      {seat.table_number}
-                    </p>
-                    <p className="text-[9px] text-blue-700 font-bold leading-none">
-                      {seat.seat_number}
+                      {seat.table_number}·{seat.seat_number}
                     </p>
                   </div>
                 </button>
