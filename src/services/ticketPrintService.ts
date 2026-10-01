@@ -39,7 +39,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
         <head>
           <style>
             @page { 
-                size: 80mm 60mm; 
+                size: 100mm 80mm; 
                 margin: 0; 
             }
             body { 
@@ -49,9 +49,8 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 padding: 0; 
             }
             .ticket { 
-                width: 80mm; /* Dikurangi sedikit untuk margin aman */
-                height: 60mm;
-                padding: 2mm; 
+                width: 100mm; /* Dikurangi sedikit untuk margin aman */
+                height: 80mm;
                 box-sizing: border-box; 
                 page-break-after: always; /* Pastikan rangkap ke-2 pindah kertas */
                 align: left;
