@@ -25,7 +25,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
       </div>
     `;
 
-    const printContent = ticketHTML;
+    const printContent = ticketHTML + ticketHTML;
 
     const iframe = document.createElement("iframe");
     iframe.style.display = "none";
@@ -36,6 +36,38 @@ export const printGuestTicket = async (guest_h_id: string) => {
     // 2. CSS disesuaikan untuk A7 Landscape dan Flexbox Layout
     iframeDoc?.write(`
       <html>
+        <head>
+          <style>
+            
+            body { 
+                font-family: Arial, sans-serif; 
+                font-size: 14px; 
+                margin: 0 !important; 
+                padding: 0 !important;
+                width: 100%;
+                vertical-align: top;
+            }
+            .ticket { 
+                width: 100%; 
+                padding: 0mm; 
+                box-sizing: border-box; 
+                page-break-after: always; 
+                
+                /* [PENTING] Gunakan flex agar div 50% sejajar kiri-kanan */
+                display: flex;
+                flex-direction: row;
+            }
+            hr { 
+                border: 0; 
+                border-top: 2px dashed #000; 
+                margin: 6px 0; 
+            }
+            .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .text-large { font-size: 18px; }
+            .info-row { margin-top: 4px; font-size: 16px; }
+          </style>
+        </head>
         <body>
           ${printContent}
         </body>
