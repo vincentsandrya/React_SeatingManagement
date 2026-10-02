@@ -40,7 +40,7 @@ export const printGuestTicket = async (guest_h_id: string) => {
           <style>
             @page { 
                 /* ISO A7 Landscape: Lebar 105mm, Tinggi 35mm */
-                size: 105mm 35mm; 
+                size: 80mm 35mm; 
                 margin: 0 !important; 
             }
             body { 
@@ -53,14 +53,9 @@ export const printGuestTicket = async (guest_h_id: string) => {
             }
             .ticket { 
                 width: 100%; 
-                height: auto; /* Penuhi seluruh tinggi kertas */
                 padding: 0mm; 
                 box-sizing: border-box; 
                 page-break-after: always; 
-                
-                background-color: #2e2e2e;
-                print-color-adjust: exact;
-                border: 1px solid black;
                 
                 /* [PENTING] Gunakan flex agar div 50% sejajar kiri-kanan */
                 display: flex;
