@@ -83,7 +83,7 @@ export const printStickerTSPL = async (data: PrintData) => {
   const tsplCommand =
     `\x1B\x40` + // Initialize printer
     `\x1B\x61\x01` + // Center Align
-    `\n`;
+    `\n` +
     `Kode: ${data.ticketCode}\n` +
     `--------------------------\n` +
     `${data.guestName}\n` +
