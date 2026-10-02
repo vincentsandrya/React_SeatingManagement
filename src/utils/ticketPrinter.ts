@@ -12,51 +12,67 @@ export const generateAndPrintTicket = async (guest_h_id: string): Promise<void> 
         return;
     }
 
-    // Sesuaikan mapping variabel dengan return dari getTicketData Anda
-    // (Berdasarkan kode sebelumnya, biasanya return-nya: ticket_code, name, table_number, pax)
     const ticketCode = data.ticket_code || '-';
     const guestName = data.name || '-';
     const tableNumber = data.table_number || '-';
     const paxCount = data.pax || 0;
 
     // 2. Kalkulasi Tinggi Kertas (Height Fit)
-    let yPos = 5; 
+    let yPos = 2; // Mulai dari atas dengan sedikit margin
     const lineHeight = 6;
-    const calculatedHeight = yPos + (lineHeight * 5) + 5; 
+    const calculatedHeight = yPos + (lineHeight * 4) + 12; // Hasilnya sekitar 38mm
 
-    // 3. Inisialisasi jsPDF (Lebar 80mm, Tinggi dinamis)
+    // Variabel untuk membatasi 60% area (dari total lebar 80mm)
+    const startX = 4; // Margin kiri
+    const width60 = 80 * 0.6; // 48mm
+    const endX = width60 - 2; // Batas kanan untuk garis putus-putus = 46mm
+    const centerX = startX + (endX - startX) / 2; // Titik tengah area 60% = 25mm
+
+    // 3. Inisialisasi jsPDF 
+    // Format [lebar, tinggi]. Lebar fix 80mm, tinggi dinamis
     const doc = new jsPDF({
-      orientation: 'portrait',
+      orientation: 'landscape',
       unit: 'mm',
       format: [80, calculatedHeight]
     });
 
     // --- MULAI MENGGAMBAR KE PDF ---
+    
+    // Baris 1: Kode (Tengah di area 60%)
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(12);
-
-    // Baris 1: Kode
-    doc.text(`Kode : ${ticketCode}`, 4, yPos += lineHeight);
+    doc.setFontSize(10);
+    yPos += lineHeight;
+    // Gunakan { align: "center" } dengan sumbu X di titik tengah area 60%
+    doc.text(`Kode : ${ticketCode}`, centerX, yPos, { align: "center" });
     
-    // Garis (hr)
-    doc.setLineWidth(0.5);
-    doc.setLineDashPattern([1, 1], 0); // Efek dashed line
-    doc.line(4, yPos += 2, 76, yPos); 
-    doc.setLineDashPattern([], 0); // Reset dash
+    // Garis (hr) hanya sampai batas 60% (endX)
+    yPos += 3;
+    doc.setLineWidth(0.4);
+    doc.setLineDashPattern([1, 1], 0); 
+    doc.line(startX, yPos, endX, yPos); 
+    doc.setLineDashPattern([], 0); 
     
-    // Baris 2: Nama
+    // Baris 2: Nama (Tengah di area 60%, bold, teks lebih besar)
+    yPos += lineHeight;
     doc.setFont("helvetica", "bold");
-    doc.text(`${guestName}`, 4, yPos += lineHeight);
+    doc.setFontSize(12);
+    doc.text(`${guestName}`, centerX, yPos, { align: "center" });
     
-    // Garis (hr)
+    // Garis (hr) hanya sampai batas 60%
+    yPos += 3;
     doc.setFont("helvetica", "normal");
+    doc.setFontSize(11);
     doc.setLineDashPattern([1, 1], 0);
-    doc.line(4, yPos += 2, 76, yPos);
+    doc.line(startX, yPos, endX, yPos);
     doc.setLineDashPattern([], 0);
     
-    // Baris 3: Table & Pax
-    doc.text(`TABLE : ${tableNumber}`, 4, yPos += lineHeight);
-    doc.text(`PAX : ${paxCount}`, 4, yPos += lineHeight);
+    // Baris 3 & 4: Table & Pax (Rata kiri di dalam area 60%)
+    yPos += lineHeight;
+    doc.text(`TABLE : ${tableNumber}`, startX, yPos);
+    yPos += lineHeight;
+    doc.text(`PAX : ${paxCount}`, startX, yPos);
+    
+    // Area X = 48 sampai X = 80 dibiarkan kosong (40% bagian kanan)
     // ----------------------------------------------
 
     // 4. Trigger Print
