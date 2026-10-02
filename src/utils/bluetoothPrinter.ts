@@ -81,15 +81,11 @@ export const printStickerTSPL = async (data: PrintData) => {
 
   // Perintah TSPL
   const tsplCommand = 
-    `SIZE 50 mm, 30 mm\r\n` +
-    `GAP 2 mm, 0 mm\r\n` +
-    `CLS\r\n` +
-    `TEXT 190,20,"2",0,1,1,1,"Kode: ${data.ticketCode}"\r\n` +
-    `BAR 20,45,360,2\r\n` +
-    `TEXT 200,60,"3",0,1,1,2,"${data.guestName}"\r\n` +
-    `BAR 20,110,360,2\r\n` +
-    `TEXT 30,130,"2",0,1,1,1,"TABLE : ${data.tableNumber}"\r\n` +
-    `TEXT 30,160,"2",0,1,1,1,"PAX   : ${data.paxCount}"\r\n` +
+    `Kode: ${data.ticketCode}\r\n` +
+    `----------------------------` +
+    `${data.guestName}"\r\n` +
+    `TABLE : ${data.tableNumber}"\r\n` +
+    `PAX   : ${data.paxCount}"\r\n` +
     `PRINT 1,1\r\n`;
 
   try {
