@@ -48,7 +48,7 @@ export const TicketTemplate = forwardRef<HTMLDivElement, Props>(
         {/* --- COPY 1 --- */}
         <div className="ticket-copy">
           <div style={{ textAlign: "center", fontSize: "14px" }}>
-            Kode : {data.ticket_code}
+            KKKode : {data.ticket_code}
           </div>
           <hr />
           <div
