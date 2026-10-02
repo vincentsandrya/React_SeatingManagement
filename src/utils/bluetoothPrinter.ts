@@ -87,7 +87,9 @@ export const printStickerTSPL = async (data: PrintData) => {
     `TABLE : ${data.tableNumber}"\r\n` +
     `PAX   : ${data.paxCount}"\r\n` +
     `\r\n` +
-    `PRINT 1,1\r\n`;
+    `\r\n` +
+    `\r\n` +
+    `r\n`;
 
   try {
     await sendTextToPrinter(tsplCommand);
