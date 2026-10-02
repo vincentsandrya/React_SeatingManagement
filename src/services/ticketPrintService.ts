@@ -58,10 +58,13 @@ export const printGuestTicket = async (guest_h_id: string) => {
                 box-sizing: border-box; 
                 page-break-after: always; 
                 
+                background-color: #2e2e2e;
+                print-color-adjust: exact;
+                border: 1px solid black;
+                
                 /* [PENTING] Gunakan flex agar div 50% sejajar kiri-kanan */
                 display: flex;
                 flex-direction: row;
-                align-items: flex-start; /* <--- DITAMBAHKAN DI SINI AGAR RATA ATAS ---> */
             }
             hr { 
                 border: 0; 
