@@ -22,8 +22,11 @@ import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
 import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
 import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
 import { printGuestTicket } from "../services/ticketPrintService";
+import { useTicketPrinter } from "../hooks/useTicketPrinter";
 
 export default function MasterAttendancePage() {
+  const { printGuestTicket, PrinterComponent } = useTicketPrinter();
+
   // --- STATES ---
   const [guests, setGuests] = useState<GuestView[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -187,6 +190,8 @@ export default function MasterAttendancePage() {
         </div>
       </div>
 
+      <PrinterComponent />
+
       {/* DATA TABLE */}
       <div className="bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden flex flex-col min-h-[460px]">
         <div className="overflow-x-auto flex-1">
@@ -278,9 +283,10 @@ export default function MasterAttendancePage() {
                       <div className="flex items-center justify-end gap-3">
                         {guest.checked_in_at && (
                           <button
-                            onClick={async () => {
-                              await printGuestTicket(guest.guest_h_id);
-                            }}
+                            onClick={() => printGuestTicket(guest.guest_h_id)}
+                            // onClick={async () => {
+                            //   await printGuestTicket(guest.guest_h_id);
+                            // }}
                             className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
                             title="Print Tiket Tamu"
                           >
