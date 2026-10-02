@@ -21,7 +21,7 @@ import type { GuestView } from "../types/database.types";
 import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
 import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
 import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
-import { printGuestTicket } from "../services/ticketPrintService";
+// import { printGuestTicket } from "../services/ticketPrintService";
 import { useTicketPrinter } from "../hooks/useTicketPrinter";
 
 export default function MasterAttendancePage() {
