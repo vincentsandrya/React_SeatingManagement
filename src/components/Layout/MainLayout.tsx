@@ -21,6 +21,7 @@ export type NavigationTab =
   | "master"
   | "checkin"
   | "map"
+  | "report"
   | "settings"
   | "support";
 
@@ -46,6 +47,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
     { id: "master", label: "Master Attendance", icon: Users },
     { id: "checkin", label: "Check-In", icon: QrCode },
     // { id: "map", label: "Map", icon: MapPin },
+    { id: "report", label: "Guest Report", icon: Users },
   ];
 
   const bottomNavItems = [
@@ -63,6 +65,8 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
         return "Check-In Scanner";
       case "map":
         return "Interactive Seating Map";
+      case "report":
+        return "Guest Report";
       case "settings":
         return "System Settings";
       case "support":

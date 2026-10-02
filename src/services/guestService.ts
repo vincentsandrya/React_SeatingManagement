@@ -1,5 +1,6 @@
 import { supabase } from "../lib/supabase";
 import type { GuestD } from "../types/database.types";
+import type { TableReportData, TableReportItem } from "../types/report";
 
 export const guestService = {
   /**
@@ -364,5 +365,47 @@ export const guestService = {
       table_number: maxTable,
       pax: paxCount,
     };
+  },
+
+  getTableReport: async (): Promise<TableReportData> => {
+    try {
+      const { data, error } = await supabase.rpc("get_report_guest");
+
+      if (error) {
+        throw error;
+      }
+
+      const items: TableReportItem[] = data || [];
+
+      const grandTotal = items.reduce(
+        (acc, curr) => ({
+          invitation_check_in:
+            acc.invitation_check_in + Number(curr.invitation_check_in),
+          invitation_pending:
+            acc.invitation_pending + Number(curr.invitation_pending),
+          invitation_total:
+            acc.invitation_total + Number(curr.invitation_total),
+          pax_check_in: acc.pax_check_in + Number(curr.pax_check_in),
+          pax_pending: acc.pax_pending + Number(curr.pax_pending),
+          pax_total: acc.pax_total + Number(curr.pax_total),
+        }),
+        {
+          invitation_check_in: 0,
+          invitation_pending: 0,
+          invitation_total: 0,
+          pax_check_in: 0,
+          pax_pending: 0,
+          pax_total: 0,
+        },
+      );
+
+      return {
+        items,
+        grandTotal,
+      };
+    } catch (error) {
+      console.error("Error fetching table report:", error);
+      throw error;
+    }
   },
 };

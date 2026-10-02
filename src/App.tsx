@@ -6,6 +6,7 @@ import DashboardPage from './pages/DashboardPage';
 import CheckInPage from './pages/CheckInPage';
 import MasterAttendancePage from './pages/MasterAttendancePage';
 import MapPage from './pages/MapPage';
+import { ReportGuestPage } from "./pages/ReportGuestPage";
 
 // const SeatingMapPage = () => (
 //   <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
@@ -33,6 +34,7 @@ const AppContent: React.FC = () => {
       {activeTab === "master" && <MasterAttendancePage />}
       {activeTab === "checkin" && <CheckInPage />}
       {activeTab === "map" && <MapPage />}
+      {activeTab === "report" && <ReportGuestPage />}
       {activeTab === "settings" && (
         <div className="p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
           Settings Page
