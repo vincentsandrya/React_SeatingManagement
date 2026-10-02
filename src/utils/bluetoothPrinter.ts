@@ -11,11 +11,11 @@ export const connectBluetoothPrinter = async (): Promise<boolean> => {
     const device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
       optionalServices: [
-        '000018f0-0000-1000-8000-00805f9b34fb', // Standard BLE Print
-        '0000ffe0-0000-1000-8000-00805f9b34fb', // Custom BLE (Eppos)
-        'e7810a71-73ae-499d-8c15-faa9aef0c3f2', // Base printer
-        '49535343-fe7d-4ae5-8fa9-9fafd205e455'  // ISSC BLE
-      ]
+        "000018f0-0000-1000-8000-00805f9b34fb", // Standard BLE Print
+        "0000ffe0-0000-1000-8000-00805f9b34fb", // Custom BLE (Eppos)
+        "e7810a71-73ae-499d-8c15-faa9aef0c3f2", // Base printer
+        "49535343-fe7d-4ae5-8fa9-9fafd205e455", // ISSC BLE
+      ],
     });
 
     console.log("Device terpilih:", device.name);
@@ -31,9 +31,9 @@ export const connectBluetoothPrinter = async (): Promise<boolean> => {
       for (const char of characteristics) {
         if (char.properties.write || char.properties.writeWithoutResponse) {
           printCharacteristic = char;
-          
+
           // Listener jika printer tiba-tiba mati / terputus
-          device.addEventListener('gattserverdisconnected', () => {
+          device.addEventListener("gattserverdisconnected", () => {
             console.warn("Koneksi Printer Terputus!");
             printCharacteristic = null;
           });
@@ -42,7 +42,7 @@ export const connectBluetoothPrinter = async (): Promise<boolean> => {
         }
       }
     }
-    
+
     throw new Error("Jalur Print (Characteristic) tidak ditemukan.");
   } catch (error) {
     console.error("Koneksi Error:", error);
@@ -57,11 +57,11 @@ const sendTextToPrinter = async (text: string) => {
   const encoder = new TextEncoder();
   const data = encoder.encode(text);
   const CHUNK_SIZE = 100; // Kirim per 100 byte
-  
+
   for (let i = 0; i < data.length; i += CHUNK_SIZE) {
     const chunk = data.slice(i, i + CHUNK_SIZE);
     await printCharacteristic.writeValue(chunk);
-    await new Promise(resolve => setTimeout(resolve, 50)); // Jeda 50ms
+    await new Promise((resolve) => setTimeout(resolve, 50)); // Jeda 50ms
   }
 };
 
@@ -80,16 +80,15 @@ export const printStickerTSPL = async (data: PrintData) => {
   }
 
   // Perintah TSPL
-  const tsplCommand = 
-    `Kode: ${data.ticketCode}\r\n` +
-    `----------------------------\r\n` +
-    `${data.guestName}"\r\n` +
-    `TABLE : ${data.tableNumber}"\r\n` +
-    `PAX   : ${data.paxCount}"\r\n` +
-    `\r\n` +
-    `\r\n` +
-    `\r\n` +
-    `r\n`;
+  const tsplCommand =
+    `\x1B\x40` + // Initialize printer
+    `\x1B\x61\x01` + // Center Align
+    `Kode: ${data.ticketCode}\n` +
+    `--------------------------\n` +
+    `${data.guestName}\n` +
+    `TABLE : ${data.tableNumber}\n` +
+    `PAX   : ${data.paxCount}\n` +
+    `\n\n\n\n`;
 
   try {
     await sendTextToPrinter(tsplCommand);
