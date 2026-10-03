@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Search,
   XCircle,
+  Printer,
 } from "lucide-react";
 
 // Import Services, Helpers & Types
@@ -21,7 +22,7 @@ import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
 import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
 import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
 // import { generateAndPrintTicket } from "../utils/ticketPrinter";
-import { printStickerTSPL } from "../utils/bluetoothPrinter";
+import { printStickerESCPOS } from "../utils/bluetoothPrinter";
 
 export default function MasterAttendancePage() {
   // --- STATES ---
@@ -42,7 +43,6 @@ export default function MasterAttendancePage() {
   const [editingGuest, setEditingGuest] = useState<GuestView | null>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
-  const [isPrinting, setIsPrinting] = useState(false);
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -87,11 +87,9 @@ export default function MasterAttendancePage() {
 
   const handlePrint = async (guestId: string) => {
     setIsLoading(true);
-    setIsPrinting(true);
 
-    await printStickerTSPL(guestId);
+    await printStickerESCPOS(guestId);
     setIsLoading(false);
-    setIsPrinting(false);
   };
 
   const handleExportCSV = async () => {
@@ -295,14 +293,10 @@ export default function MasterAttendancePage() {
                         {guest.checked_in_at && (
                           <button
                             onClick={() => handlePrint(guest.guest_h_id)}
-                            disabled={isPrinting}
-                            style={{
-                              padding: "10px 20px",
-                              background: "#28a745",
-                              color: "white",
-                            }}
+                            className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
+                            title="Print Tiket Tamu"
                           >
-                            {isPrinting ? "Mencetak..." : "🖨️ Print"}
+                            <Printer size={12} /> Print
                           </button>
                         )}
                         <button

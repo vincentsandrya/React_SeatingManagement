@@ -75,7 +75,7 @@ const sendTextToPrinter = async (text: string) => {
   }
 };
 
-export const printStickerTSPL = async (
+export const printStickerESCPOS = async (
   guest_h_id: string,
   copies: number = 2,
 ) => {
@@ -92,12 +92,28 @@ export const printStickerTSPL = async (
   }
 
   const ticketCode = data.ticket_code || "-";
-  const guestName = data.name || "-";
+
+  // LOGIC PENAMBAHAN UNTUK GUEST NAME
+  let guestName = data.name || "-";
+
+  // 1. Cut/Trim jika lebih dari 60 karakter
+  if (guestName.length > 60) {
+    guestName = guestName.substring(0, 60);
+  }
+
+  // 2. Tambahkan spasi di belakang jika kurang dari 34 karakter
+  if (guestName.length < 34) {
+    guestName = guestName.padEnd(34, " ");
+  }
+
+  // Alternatif kode satu baris (opsional, jika suka yang lebih ringkas):
+  // const guestName = (data.name || "-").substring(0, 60).padEnd(34, " ");
+
   const tableNumber = data.table_number || "-";
   const paxCount = data.pax || 0;
 
-  // Perintah TSPL
-  const tsplCommand =
+  // Perintah ESC/POS
+  const escposCommand =
     `\x1B\x40` + // Initialize printer
     `\x1B\x61\x01` + // Center Align
     `\n` +
@@ -106,11 +122,16 @@ export const printStickerTSPL = async (
     `${guestName}\n` +
     `TABLE : ${tableNumber}\n` +
     `PAX   : ${paxCount}\n` +
-    `\n\n\n\n`;
+    `\n\n`;
 
   try {
     for (let i = 1; i <= copies; i++) {
-      await sendTextToPrinter(tsplCommand);
+      await sendTextToPrinter(escposCommand);
+
+      // Jeda 300ms antar rangkap untuk memberi nafas pada memori printer (opsional tapi sangat disarankan)
+      if (copies > 1) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
     }
   } catch (error) {
     console.error("Gagal mengirim perintah print:", error);
