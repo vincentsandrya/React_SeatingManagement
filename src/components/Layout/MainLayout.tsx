@@ -7,7 +7,6 @@ import {
   // MapPin,
   Settings,
   HelpCircle,
-  Search,
   Bell,
   User as UserIcon,
   Menu,
@@ -15,6 +14,7 @@ import {
   LogOut,
 } from "lucide-react";
 import NetworkStatus from "./NetworkStatus";
+import { PrinterStatus } from "./PrinterStatus";
 
 export type NavigationTab =
   | "dashboard"
@@ -187,17 +187,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({
 
           {/* Right: Search Input & Profile Controls */}
           <div className="flex items-center gap-3 sm:gap-4">
-            {/* Search Input Box */}
-            <div className="relative hidden md:block w-64">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                <Search className="w-4 h-4" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search report..."
-                className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-slate-400 transition"
-              />
-            </div>
+            <PrinterStatus />
 
             {/* Notification Bell */}
             <button className="hidden md:block p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition relative">

@@ -103,33 +103,33 @@ export const guestService = {
   /**
    * 5. Proses Check-in Partial (Berdasarkan list ID yang dipilih)
    */
-  processCheckIn: async (listGuestDId: string[], guest_h_id: string) => {
-    const timestamp = new Date().toISOString();
+  // processCheckIn: async (listGuestDId: string[], guest_h_id: string) => {
+  //   const timestamp = new Date().toISOString();
 
-    try {
-      // 1. Update list guest_d yang diceklis (hadir)
-      const { error: errorD } = await supabase
-        .from("guest_d")
-        .update({ checked_in_at: timestamp })
-        .in("guest_d_id", listGuestDId);
+  //   try {
+  //     // 1. Update list guest_d yang diceklis (hadir)
+  //     const { error: errorD } = await supabase
+  //       .from("guest_d")
+  //       .update({ checked_in_at: timestamp })
+  //       .in("guest_d_id", listGuestDId);
 
-      if (errorD) throw errorD;
+  //     if (errorD) throw errorD;
 
-      // 2. Update guest_h_id (Tandai rombongan sudah tiba)
-      // Meskipun yang datang hanya 2 dari 3, secara rombongan tiket ini sudah tercatat dipakai.
-      const { error: errorH } = await supabase
-        .from("guest_h")
-        .update({ checked_in_at: timestamp })
-        .eq("guest_h_id", guest_h_id);
+  //     // 2. Update guest_h_id (Tandai rombongan sudah tiba)
+  //     // Meskipun yang datang hanya 2 dari 3, secara rombongan tiket ini sudah tercatat dipakai.
+  //     const { error: errorH } = await supabase
+  //       .from("guest_h")
+  //       .update({ checked_in_at: timestamp })
+  //       .eq("guest_h_id", guest_h_id);
 
-      if (errorH) throw errorH;
+  //     if (errorH) throw errorH;
 
-      return true;
-    } catch (error) {
-      console.error("Error during check-in process:", error);
-      throw error;
-    }
-  },
+  //     return true;
+  //   } catch (error) {
+  //     console.error("Error during check-in process:", error);
+  //     throw error;
+  //   }
+  // },
 
   /**
    * 6. Download Laporan Seluruh Tamu (Tanpa Pagination)
@@ -181,8 +181,6 @@ export const guestService = {
       throw error;
     }
   },
-
-  // --- Tambahkan ini di dalam guestService.ts ---
 
   /**
    * Mengambil seluruh data header tamu (guest_h) untuk keperluan Bulk QR.
@@ -243,6 +241,15 @@ export const guestService = {
 
         if (insertError) throw insertError;
       }
+
+      // 3. Update guest_h_id (Tandai rombongan sudah tiba)
+      // Meskipun yang datang hanya 2 dari 3, secara rombongan tiket ini sudah tercatat dipakai.
+      const { error: errorH } = await supabase
+        .from("guest_h")
+        .update({ checked_in_at: now })
+        .eq("guest_h_id", guestHId);
+
+      if (errorH) throw errorH;
 
       return true;
     } catch (error) {
@@ -311,6 +318,8 @@ export const guestService = {
     return data;
   },
 
+
+  //getTicketData digunakan untuk mencetak tiket sticker data tamu
   getTicketData: async (guest_h_id: string) => {
     // 1. Tarik data Header (guest_h) sekaligus berelasi dengan Detail (guest_d)
     const { data, error } = await supabase
@@ -367,6 +376,7 @@ export const guestService = {
     };
   },
 
+  //getTableReport untuk binding Report Guest
   getTableReport: async (): Promise<TableReportData> => {
     try {
       const { data, error } = await supabase.rpc("get_report_guest");

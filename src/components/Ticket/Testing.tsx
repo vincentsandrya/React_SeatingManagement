@@ -3,7 +3,7 @@
 import { useState } from "react";
 import {
   connectBluetoothPrinter,
-  printStickerTSPL,
+//   printStickerTSPL,
 } from "../../utils/bluetoothPrinter";
 
 export const PrintTicketManager = () => {
@@ -25,14 +25,14 @@ export const PrintTicketManager = () => {
   const handlePrint = async () => {
     setIsPrinting(true);
 
-    const dummyData = {
-      ticketCode: "GUEST-001",
-      guestName: "Bpk. John Doe",
-      tableNumber: "VIP 12",
-      paxCount: 4,
-    };
+    // const dummyData = {
+    //   ticketCode: "GUEST-001",
+    //   guestName: "Bpk. John Doe",
+    //   tableNumber: "VIP 12",
+    //   paxCount: 4,
+    // };
 
-    await printStickerTSPL(dummyData);
+    // await printStickerTSPL(dummyData);
     setIsPrinting(false);
   };
 

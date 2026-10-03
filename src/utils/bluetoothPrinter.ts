@@ -2,10 +2,14 @@
 
 /// <reference types="web-bluetooth" />
 
+import { guestService } from "../services/guestService";
+
 // Variabel untuk menyimpan jalur komunikasi ke printer
 let printCharacteristic: BluetoothRemoteGATTCharacteristic | null = null;
 
-export const connectBluetoothPrinter = async (): Promise<boolean> => {
+export const connectBluetoothPrinter = async (
+  onDisconnect?: () => void,
+): Promise<boolean> => {
   try {
     // 1. Request device Bluetooth
     const device = await navigator.bluetooth.requestDevice({
@@ -16,6 +20,12 @@ export const connectBluetoothPrinter = async (): Promise<boolean> => {
         "e7810a71-73ae-499d-8c15-faa9aef0c3f2", // Base printer
         "49535343-fe7d-4ae5-8fa9-9fafd205e455", // ISSC BLE
       ],
+    });
+
+    device.addEventListener("gattserverdisconnected", () => {
+      console.warn("Koneksi Printer Terputus!");
+      printCharacteristic = null;
+      if (onDisconnect) onDisconnect(); // Memanggil callback UI agar tombol reset
     });
 
     console.log("Device terpilih:", device.name);
@@ -65,34 +75,43 @@ const sendTextToPrinter = async (text: string) => {
   }
 };
 
-// Interface agar data props TypeScript rapi
-interface PrintData {
-  ticketCode: string;
-  guestName: string;
-  tableNumber: string;
-  paxCount: number;
-}
-
-export const printStickerTSPL = async (data: PrintData) => {
+export const printStickerTSPL = async (
+  guest_h_id: string,
+  copies: number = 2,
+) => {
   if (!printCharacteristic) {
     alert("Koneksikan printer terlebih dahulu!");
     return;
   }
+
+  const data = await guestService.getTicketData(guest_h_id);
+
+  if (!data) {
+    alert("Data tiket tidak ditemukan");
+    return;
+  }
+
+  const ticketCode = data.ticket_code || "-";
+  const guestName = data.name || "-";
+  const tableNumber = data.table_number || "-";
+  const paxCount = data.pax || 0;
 
   // Perintah TSPL
   const tsplCommand =
     `\x1B\x40` + // Initialize printer
     `\x1B\x61\x01` + // Center Align
     `\n` +
-    `Kode: ${data.ticketCode}\n` +
+    `Kode: ${ticketCode}\n` +
     `--------------------------\n` +
-    `${data.guestName}\n` +
-    `TABLE : ${data.tableNumber}\n` +
-    `PAX   : ${data.paxCount}\n` +
+    `${guestName}\n` +
+    `TABLE : ${tableNumber}\n` +
+    `PAX   : ${paxCount}\n` +
     `\n\n\n\n`;
 
   try {
-    await sendTextToPrinter(tsplCommand);
+    for (let i = 1; i <= copies; i++) {
+      await sendTextToPrinter(tsplCommand);
+    }
   } catch (error) {
     console.error("Gagal mengirim perintah print:", error);
     alert("Gagal mencetak. Coba refresh atau reconnect printer.");

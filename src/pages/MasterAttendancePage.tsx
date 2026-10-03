@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Search,
   XCircle,
-  Printer,
 } from "lucide-react";
 
 // Import Services, Helpers & Types
@@ -21,7 +20,8 @@ import type { GuestView } from "../types/database.types";
 import EditGuestModal from "../components/MasterAttendance/EditGuestModel";
 import IndividualQRModal from "../components/MasterAttendance/IndividualQRModal";
 import BulkQRModal from "../components/MasterAttendance/BulkQRModal";
-import { generateAndPrintTicket } from "../utils/ticketPrinter";
+// import { generateAndPrintTicket } from "../utils/ticketPrinter";
+import { printStickerTSPL } from "../utils/bluetoothPrinter";
 
 export default function MasterAttendancePage() {
   // --- STATES ---
@@ -42,6 +42,7 @@ export default function MasterAttendancePage() {
   const [editingGuest, setEditingGuest] = useState<GuestView | null>(null);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   // --- EFFECTS ---
   useEffect(() => {
@@ -78,10 +79,19 @@ export default function MasterAttendancePage() {
   const handleNextPage = () =>
     setCurrentPage((prev) => Math.min(totalPages, prev + 1));
 
+  // const handlePrint = async (guestId: string) => {
+  //   setIsLoading(true);
+  //   await generateAndPrintTicket(guestId);
+  //   setIsLoading(false);
+  // };
+
   const handlePrint = async (guestId: string) => {
     setIsLoading(true);
-    await generateAndPrintTicket(guestId);
+    setIsPrinting(true);
+
+    await printStickerTSPL(guestId);
     setIsLoading(false);
+    setIsPrinting(false);
   };
 
   const handleExportCSV = async () => {
@@ -285,10 +295,14 @@ export default function MasterAttendancePage() {
                         {guest.checked_in_at && (
                           <button
                             onClick={() => handlePrint(guest.guest_h_id)}
-                            className="flex items-center gap-1 text-[11px] font-semibold text-emerald-600 hover:text-emerald-800 transition-colors"
-                            title="Print Tiket Tamu"
+                            disabled={isPrinting}
+                            style={{
+                              padding: "10px 20px",
+                              background: "#28a745",
+                              color: "white",
+                            }}
                           >
-                            <Printer size={12} /> Print
+                            {isPrinting ? "Mencetak..." : "🖨️ Print"}
                           </button>
                         )}
                         <button

@@ -12,7 +12,6 @@ import { guestService } from "../services/guestService";
 import type { GuestDWithRelation } from "../types/database.types";
 
 import CheckInConfirmationModal from "../components/CheckIn/CheckInConfirmationModal";
-import { PrintTicketManager } from "../components/Ticket/Testing";
 
 export default function CheckInPage() {
   // --- STATES UNTUK MANUAL LOOKUP ---
@@ -125,8 +124,6 @@ export default function CheckInPage() {
           {globalStatus.message}
         </div>
       )}
-
-      <PrintTicketManager></PrintTicketManager>
 
       <div className="mb-6">
         <div className="text-xl font-bold mb-0.5 text-slate-900">
