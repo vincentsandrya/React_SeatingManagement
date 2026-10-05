@@ -6,7 +6,8 @@ import { guestService } from "../../services/guestService";
 import RegisteredGuestsList from "../CheckIn/RegisteredGuestList";
 import ExtraGuestsTable from "../CheckIn/ExtraGuestsTable";
 import type { ExtraGuest } from "../../types/CheckIn";
-import { printGuestTicket } from "../../services/ticketPrintService";
+// import { printGuestTicket } from "../../services/ticketPrintService";
+import { printStickerESCPOS } from "../../utils/bluetoothPrinter";
 
 interface CheckInConfirmationModalProps {
   scannedTicket: {
@@ -175,7 +176,8 @@ export default function CheckInConfirmationModal({
         finalPayload,
       );
 
-      await printGuestTicket(scannedTicket.guest_h_id);
+      await printStickerESCPOS(scannedTicket.guest_h_id);
+      // await printGuestTicket(scannedTicket.guest_h_id);
 
       onSuccess(
         `Berhasil memproses check-in untuk ${finalPayload.length} tamu.`,
