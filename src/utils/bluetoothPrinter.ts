@@ -111,7 +111,7 @@ export const printStickerESCPOS = async (
 
   const tableNumber = data.table_number || "-";
   const paxCount = data.pax || 0;
-  const customFeed = `\x1B\x4A` + String.fromCharCode(80);
+  const customFeed = `\x1B\x4A` + String.fromCharCode(85);
 
   // Perintah ESC/POS
   const escposCommand =
