@@ -111,19 +111,20 @@ export const printStickerESCPOS = async (
 
   const tableNumber = data.table_number || "-";
   const paxCount = data.pax || 0;
+  const customFeed = `\x1B\x4A` + String.fromCharCode(80);
 
   // Perintah ESC/POS
   const escposCommand =
     `\x1B\x40` + // Initialize printer
     `\x1B\x61\x01` + // Center Align
-    `\n` +
+    `\n\n` +
     `Kode: ${ticketCode}\n` +
     `--------------------------\n` +
     `\x1B\x61\x00` + // Left Align
     `${guestName}\n` +
     `CAT : ${tableNumber}\n` +
-    `PAX : ${paxCount}\n` +
-    `\n\n\n`;
+    `PAX : ${paxCount}` +
+    customFeed;
 
   try {
     for (let i = 1; i <= copies; i++) {
