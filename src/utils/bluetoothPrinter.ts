@@ -116,13 +116,14 @@ export const printStickerESCPOS = async (
   const escposCommand =
     `\x1B\x40` + // Initialize printer
     `\x1B\x61\x01` + // Center Align
-    `\n` +
+    `\n\n` +
     `Kode: ${ticketCode}\n` +
     `--------------------------\n` +
+    `\x1B\x61\x00` + // Left Align
     `${guestName}\n` +
-    `TABLE : ${tableNumber}\n` +
-    `PAX   : ${paxCount}\n` +
-    `\n\n`;
+    `CAT : ${tableNumber}\n` +
+    `PAX : ${paxCount}\n` +
+    `\n`;
 
   try {
     for (let i = 1; i <= copies; i++) {

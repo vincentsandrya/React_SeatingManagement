@@ -27,8 +27,8 @@ export const PrinterStatus = () => {
       disabled={isConnected || isConnecting}
       className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold border transition-all duration-300 ${
         isConnected
-          ? "bg-blue-50 text-blue-700 border-blue-200 cursor-default"
-          : "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 hover:border-slate-300 cursor-pointer shadow-sm"
+          ? "bg-emerald-50 text-emerald-700 border-emerald-200 cursor-default"
+          : "bg-red-50 text-red-700 border-red-200 hover:bg-slate-100 hover:border-slate-300 cursor-pointer shadow-sm"
       }`}
       title={
         isConnected
@@ -43,12 +43,12 @@ export const PrinterStatus = () => {
         </>
       ) : isConnected ? (
         <>
-          <Printer size={12} className="text-blue-500" />
+          <Printer size={12} className="text-emerald-500" />
           <span className="hidden md:block">Printer Ready</span>
         </>
       ) : (
         <>
-          <PrinterX size={12} className="text-slate-500" />
+          <PrinterX size={12} className="text-red-500" />
           <span className="hidden md:block">Connect Printer</span>
         </>
       )}
