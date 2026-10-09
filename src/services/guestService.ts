@@ -1,6 +1,7 @@
 import { supabase } from "../lib/supabase";
 import type { GuestD } from "../types/database.types";
 import type { TableReportData, TableReportItem } from "../types/report";
+import { getLoggedInUserEmail } from "../utils/helpers";
 
 export const guestService = {
   /**
@@ -208,6 +209,8 @@ export const guestService = {
     try {
       const now = new Date().toISOString();
 
+      const loginEmail = await getLoggedInUserEmail();
+
       // Pisahkan mana tamu lama (punya guest_d_id) dan tamu baru
       const existingGuests = guestsData.filter((g) => g.guest_d_id);
       const newGuests = guestsData.filter((g) => !g.guest_d_id);
@@ -217,7 +220,11 @@ export const guestService = {
         const existingIds = existingGuests.map((g) => g.guest_d_id);
         const { error: updateError } = await supabase
           .from("guest_d")
-          .update({ checked_in_at: now })
+          .update({
+            checked_in_at: now,
+            updated_by: loginEmail,
+            updated_at: now,
+          })
           .in("guest_d_id", existingIds);
 
         if (updateError) throw updateError;
@@ -233,6 +240,10 @@ export const guestService = {
           seat_number: g.seat_number || null,
           is_vegetarian: g.is_vegetarian || false,
           checked_in_at: now, // Langsung di-set checked_in karena diinput saat check-in
+          created_by: loginEmail,
+          created_at: now,
+          updated_by: loginEmail,
+          updated_at: now,
         }));
 
         const { error: insertError } = await supabase
@@ -246,7 +257,7 @@ export const guestService = {
       // Meskipun yang datang hanya 2 dari 3, secara rombongan tiket ini sudah tercatat dipakai.
       const { error: errorH } = await supabase
         .from("guest_h")
-        .update({ checked_in_at: now })
+        .update({ checked_in_at: now, updated_by: loginEmail, updated_at: now })
         .eq("guest_h_id", guestHId);
 
       if (errorH) throw errorH;
@@ -307,7 +318,7 @@ export const guestService = {
   getGuestHByTicketCode: async (ticketCode: string) => {
     const { data, error } = await supabase
       .from("guest_h")
-      .select("guest_h_id, ticket_code, category")
+      .select("guest_h_id, ticket_code, category, checked_in_at")
       .eq("ticket_code", ticketCode)
       .single();
 
@@ -317,7 +328,6 @@ export const guestService = {
     }
     return data;
   },
-
 
   //getTicketData digunakan untuk mencetak tiket sticker data tamu
   getTicketData: async (guest_h_id: string) => {
